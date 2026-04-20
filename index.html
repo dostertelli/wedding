@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sabrina & Gilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Toggle -->
+  <button class="nav-toggle" aria-label="Menu">
+    <div class="hamburger"><span></span><span></span><span></span></div>
+    MENU
+  </button>
+
+  <!-- Language Switcher -->
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="de">DE</button>
+  </div>
+
+  <!-- Navigation Drawer -->
+  <div class="nav-drawer-overlay"></div>
+  <nav class="nav-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">Sabrina & Gilles</span>
+      <button class="nav-close" aria-label="Close">&times;</button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="agenda.html">Agenda</a></li>
+      <li><a href="discover.html">Discover Ibiza</a></li>
+      <li><a href="qa.html">Q & A</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Layout -->
+  <div class="page-wrapper">
+
+    <!-- Left: Photo -->
+    <div class="photo-side">
+      <img src="img/hero.jpg" alt="Sabrina & Gilles">
+      <div class="photo-overlay">
+        <div class="couple-name">Sabrina & Gilles</div>
+        <div class="couple-tagline" data-lang="en">We can't wait to celebrate our special day with you!</div>
+        <div class="couple-tagline" data-lang="de">Wir können es kaum erwarten, unseren besonderen Tag mit euch zu feiern!</div>
+      </div>
+    </div>
+
+    <!-- Right: Content -->
+    <div class="content-side">
+      <div class="content-inner">
+
+        <div class="hero-content">
+          <img src="img/olive-branch.svg" alt="" class="olive-branch">
+
+          <div class="hero-date" data-lang="en">Sunday<br>September 13, 2026</div>
+          <div class="hero-date" data-lang="de">Sonntag<br>13. September 2026</div>
+
+          <div class="hero-location">Sant Josep de sa Talaia, Ibiza</div>
+
+          <span class="view-details" data-lang="en">View Details</span>
+          <span class="view-details" data-lang="de">Details ansehen</span>
+          <div class="scroll-indicator">&#8964;</div>
+
+          <img src="img/olive-branch.svg" alt="" class="olive-branch-bottom">
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sticky Footer -->
+  <div class="sticky-footer">
+    <span class="footer-date" data-lang="en">September 13th, 2026</span>
+    <span class="footer-date" data-lang="de">13. September 2026</span>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

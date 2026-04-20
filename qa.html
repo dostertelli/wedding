@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q & A – Sabrina & Gilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .qa-side {
+      position: fixed;
+      top: 0; left: 0;
+      width: 25%;
+      height: 100vh;
+      background: var(--accent);
+      color: #fff;
+      overflow-y: auto;
+      z-index: 1;
+      padding: 5.5rem 1.4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .qa-side h1 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .qa-side p {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      opacity: 0.7;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .photo-side { display: none; }
+    .content-side {
+      margin-left: 25% !important;
+      width: 75% !important;
+    }
+    .sticky-footer {
+      left: 25% !important;
+      width: 75% !important;
+    }
+    @media (max-width: 1024px) {
+      .qa-side { width: 30%; padding: 3.5rem 1.2rem 2rem; }
+      .content-side { margin-left: 30% !important; width: 70% !important; }
+      .sticky-footer { left: 30% !important; width: 70% !important; }
+    }
+    @media (max-width: 768px) {
+      .qa-side { position: relative; width: 100%; height: auto; padding: 5rem 1.5rem 2rem; }
+      .content-side { margin-left: 0 !important; width: 100% !important; }
+      .sticky-footer { left: 0 !important; width: 100% !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Toggle -->
+  <button class="nav-toggle" aria-label="Menu">
+    <div class="hamburger"><span></span><span></span><span></span></div>
+    MENU
+  </button>
+
+  <!-- Language Switcher -->
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="de">DE</button>
+  </div>
+
+  <!-- Navigation Drawer -->
+  <div class="nav-drawer-overlay"></div>
+  <nav class="nav-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">Sabrina & Gilles</span>
+      <button class="nav-close" aria-label="Close">&times;</button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="agenda.html">Agenda</a></li>
+      <li><a href="discover.html">Discover Ibiza</a></li>
+      <li><a href="qa.html" class="active">Q & A</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Layout -->
+  <div class="page-wrapper">
+
+    <!-- Left: Q&A sidebar -->
+    <div class="qa-side">
+      <h1>Q & A</h1>
+      <p data-lang="en">Everything you need to know about our wedding weekend.</p>
+      <p data-lang="de">Alles, was ihr über unser Hochzeitswochenende wissen müsst.</p>
+    </div>
+
+    <!-- Right: Content -->
+    <div class="content-side">
+      <div class="content-inner">
+
+        <!-- RSVP Deadline -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">Until when do I need to RSVP?</div>
+            <div class="qa-question" data-lang="de">Bis wann muss ich die Teilnahme bestätigen?</div>
+            <div class="qa-answer" data-lang="en">Please let us know until January 31st if you will be able to attend or not.</div>
+            <div class="qa-answer" data-lang="de">Sage uns bitte bis zum 31. Januar ob du teilnehmen kannst oder nicht.</div>
+          </div>
+        </div>
+
+        <!-- Plus One -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">Can I bring a plus-one?</div>
+            <div class="qa-question" data-lang="de">Kann ich eine Begleitperson mitbringen?</div>
+            <div class="qa-answer" data-lang="en">Unless specifically stated in your invitation, please understand that this won't be possible.</div>
+            <div class="qa-answer" data-lang="de">Nein, das ist leider nicht möglich.</div>
+          </div>
+        </div>
+
+        <!-- Indoor/Outdoor -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">Is the wedding taking place indoors or outdoors?</div>
+            <div class="qa-question" data-lang="de">Findet die Trauung drinnen oder draußen statt?</div>
+            <div class="qa-answer" data-lang="en">Our wedding ceremony will take place outdoors.</div>
+            <div class="qa-answer" data-lang="de">Unsere Trauung wird draußen stattfinden.</div>
+          </div>
+        </div>
+
+        <!-- Dress Code -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">What should I wear?</div>
+            <div class="qa-question" data-lang="de">Was soll ich anziehen?</div>
+            <div class="qa-answer" data-lang="en">Please adhere to the cocktail dress code. If you're unsure what this means, take a look at this website for more details: <a href="https://www.brides.com/cocktail-attire-wedding-4844364" target="_blank" rel="noopener">www.brides.com/cocktail-attire-wedding-4844364</a></div>
+            <div class="qa-answer" data-lang="de">Bitte halte dich an den Cocktail-Dresscode. Wenn du nicht sicher bist, was das bedeutet, findest du weitere Informationen auf dieser Website: <a href="https://www.brides.com/cocktail-attire-wedding-4844364" target="_blank" rel="noopener">www.brides.com/cocktail-attire-wedding-4844364</a></div>
+          </div>
+        </div>
+
+        <!-- Reception End -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">What time will the reception end?</div>
+            <div class="qa-question" data-lang="de">Um wie viel Uhr endet die Feier?</div>
+            <div class="qa-answer" data-lang="en">Due to our wedding happening in a private home and the strict noise restriction laws in Ibiza, we're forced to end the reception at 12:00am. But since this is Ibiza, there is plenty of opportunity for after-parties :)</div>
+            <div class="qa-answer" data-lang="de">Da unsere Hochzeit in einem Privathaus stattfindet und auf Ibiza strenge Lärmschutzvorschriften gelten, müssen wir die Feier um 0:00 Uhr beenden. Aber da wir uns auf Ibiza befinden, gibt es jede Menge Möglichkeiten für After-Partys :)</div>
+          </div>
+        </div>
+
+        <!-- Accommodation -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">Will you provide accommodation?</div>
+            <div class="qa-question" data-lang="de">Wird uns eine Unterkunft zur Verfügung gestellt?</div>
+            <div class="qa-answer" data-lang="en">We hope that you understand that we cannot provide accommodation for all our guests. We therefore appreciate everyone who is willing to travel the long way to spend our wedding-weekend with us.</div>
+            <div class="qa-answer" data-lang="de">Wir hoffen, dass du Verständnis dafür hast, dass wir nicht allen Gästen eine Unterkunft zur Verfügung stellen können. Wir sind daher allen dankbar, die bereit sind, den weiten Weg auf sich zu nehmen, um unser Hochzeitswochenende mit uns zu verbringen.</div>
+          </div>
+        </div>
+
+        <!-- Weather -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">How is the weather going to be in Ibiza in September?</div>
+            <div class="qa-question" data-lang="de">Wie ist das Wetter im September auf Ibiza?</div>
+            <div class="qa-answer" data-lang="en">In September, Ibiza still enjoys summery temperatures. During the day, temperatures can reach up to 25 degrees. However, bear in mind that it can get chilly after sunset – so don't forget to pack a jumper or light jacket!</div>
+            <div class="qa-answer" data-lang="de">Im September herrschen auf Ibiza noch sommerliche Temperaturen. Tagsüber können die Temperaturen bis zu 25 Grad erreichen. Beachte jedoch, dass es nach Sonnenuntergang kühl werden kann – vergesse also nicht, einen Pullover oder eine leichte Jacke einzupacken!</div>
+          </div>
+        </div>
+
+        <!-- Photos -->
+        <div class="section">
+          <div class="qa-item">
+            <div class="qa-question" data-lang="en">Is it okay to take pictures with our phones and cameras during the wedding?</div>
+            <div class="qa-question" data-lang="de">Ist es in Ordnung, während der Hochzeit Fotos mit unseren Handys und Kameras zu machen?</div>
+            <div class="qa-answer" data-lang="en">We will have a professional photographer at the event. Please enjoy the moment with us and we kindly ask you not to take any photos during the ceremony.</div>
+            <div class="qa-answer" data-lang="de">Wir werden einen professionellen Fotografen bei der Hochzeit haben. Bitte genieße den Moment mit uns und wir bitten dich, während der Zeremonie keine Fotos zu machen.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sticky Footer -->
+  <div class="sticky-footer">
+    <span class="footer-date" data-lang="en">September 13th, 2026</span>
+    <span class="footer-date" data-lang="de">13. September 2026</span>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

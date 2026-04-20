@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Ibiza – Sabrina & Gilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <style>
+    /* ===== DISCOVER LAYOUT (mirrors Agenda) ===== */
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Left: Category navigation */
+    .category-side {
+      position: fixed;
+      top: 0; left: 0;
+      width: 25%;
+      height: 100vh;
+      background: var(--accent);
+      color: #fff;
+      overflow-y: auto;
+      z-index: 1;
+      padding: 5.5rem 1.4rem 2rem;
+    }
+
+    .category-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .category-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .category-header p {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      opacity: 0.6;
+      letter-spacing: 0.03em;
+      line-height: 1.5;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    /* Category groups */
+    .cat-group {
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding: 1rem 0;
+    }
+    .cat-group:last-child { border-bottom: 1px solid rgba(255,255,255,0.12); }
+
+    .cat-group-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      padding: 0.3rem 0;
+    }
+
+    .cat-group-header .cat-emoji { font-size: 1.2rem; }
+
+    .cat-group-header .cat-label {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .cat-group-header .cat-arrow {
+      margin-left: auto;
+      font-size: 0.7rem;
+      opacity: 0.4;
+      transition: transform 0.3s;
+    }
+
+    .cat-group.open .cat-arrow { transform: rotate(90deg); }
+
+    .cat-group-single {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
+      margin-bottom: 0;
+      cursor: pointer;
+      border-bottom: none;
+      transition: opacity 0.2s;
+    }
+    .cat-group-single:hover { opacity: 0.7; }
+    .cat-group-single .cat-emoji { font-size: 1.2rem; }
+    .cat-group-single .cat-label {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .cat-group-single.active .cat-label {
+      opacity: 1;
+      font-weight: 600;
+    }
+
+    .cat-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+
+    .cat-group.open .cat-items { max-height: 2000px; }
+
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 0.82rem;
+    }
+
+    .cat-item:hover, .cat-item.active { background: rgba(255,255,255,0.1); }
+    .cat-item.active { background: rgba(255,255,255,0.15); }
+
+    .cat-item .item-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .item-dot.travel { background: #d4d4a5; }
+    .item-dot.beach { background: #a5c4d4; }
+    .item-dot.food { background: #c4a5d4; }
+    .item-dot.activity { background: #a5d4b4; }
+
+    .cat-item .item-label {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cat-item .item-price {
+      margin-left: auto;
+      font-size: 0.7rem;
+      opacity: 0.45;
+      flex-shrink: 0;
+    }
+
+    /* Right: Detail view */
+    .content-side { margin-left: 25%; width: 75%; }
+
+    .detail-view {
+      padding: 2.5rem 4rem 3rem;
+      max-width: none;
+      margin: 0 auto;
+    }
+
+    .detail-card {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .detail-placeholder {
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .detail-placeholder .placeholder-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+    .detail-placeholder p {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    .detail-card { display: none; }
+    .detail-card.visible {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-card .detail-category-label {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 0.3rem;
+    }
+
+    .detail-card h2 {
+      font-family: var(--font-heading);
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-card .detail-price {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .detail-card .detail-img {
+      width: 100%;
+      height: 360px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      background: #e0ddd5;
+    }
+
+    .detail-card .detail-body {
+      font-size: 0.95rem;
+      color: var(--text-medium);
+      line-height: 1.8;
+    }
+    .detail-card .detail-body p { margin-bottom: 1rem; }
+
+    .detail-card .detail-map-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding: 0.5rem 1.2rem;
+      border: 1px solid var(--accent);
+      border-radius: 50px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+      transition: background 0.3s, color 0.3s;
+      text-decoration: none;
+      border-bottom: none;
+    }
+    .detail-card .detail-map-link:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .detail-card .detail-map-link svg { width: 14px; height: 14px; }
+
+    .detail-card .detail-tip {
+      background: rgba(107,112,92,0.08);
+      border-left: 3px solid var(--accent);
+      padding: 0.8rem 1rem;
+      margin-top: 1.2rem;
+      font-size: 0.83rem;
+      color: var(--text-medium);
+      line-height: 1.6;
+      border-radius: 0 4px 4px 0;
+    }
+    .detail-card .detail-tip strong { color: var(--text-dark); }
+
+    /* ===== MAP ===== */
+    #mapContainer {
+      width: 100%;
+      height: calc(100vh - 180px);
+      min-height: 500px;
+      border-radius: 10px;
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .map-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      color: var(--text-medium);
+    }
+    .map-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .map-legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .map-legend-dot.travel { background: #d4d4a5; }
+    .map-legend-dot.beach { background: #a5c4d4; }
+    .map-legend-dot.food { background: #c4a5d4; }
+    .map-legend-dot.activity { background: #a5d4b4; }
+
+    /* Spot list inside detail card */
+    .spot-list { list-style: none; padding: 0; }
+    .spot-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-size: 0.88rem;
+      color: var(--text-medium);
+      line-height: 1.5;
+    }
+    .spot-list li:last-child { border-bottom: none; }
+    .spot-list .spot-name { font-weight: 700; color: var(--text-dark); }
+    .spot-list .spot-name a {
+      color: var(--text-dark);
+      border-bottom: 1px solid var(--text-light);
+    }
+    .spot-list .spot-name a:hover { border-bottom-color: var(--text-dark); }
+
+    /* Sticky footer */
+    .sticky-footer { left: 25%; width: 75%; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .category-side { width: 30%; padding: 3.5rem 1.2rem 2rem; }
+      .content-side { margin-left: 30%; width: 70%; }
+      .sticky-footer { left: 30%; width: 70%; }
+    }
+    @media (max-width: 768px) {
+      .page-wrapper { flex-direction: column; }
+      .category-side { position: relative; width: 100%; height: auto; padding: 5rem 1.5rem 2rem; }
+      .content-side { margin-left: 0; width: 100%; }
+      .detail-view { padding: 2rem 1.5rem; }
+      .sticky-footer { left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Toggle -->
+  <button class="nav-toggle" aria-label="Menu">
+    <div class="hamburger"><span></span><span></span><span></span></div>
+    MENU
+  </button>
+
+  <!-- Language Switcher -->
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="de">DE</button>
+  </div>
+
+  <!-- Navigation Drawer -->
+  <div class="nav-drawer-overlay"></div>
+  <nav class="nav-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">Sabrina & Gilles</span>
+      <button class="nav-close" aria-label="Close">&times;</button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="agenda.html">Agenda</a></li>
+      <li><a href="discover.html" class="active">Discover Ibiza</a></li>
+      <li><a href="qa.html">Q & A</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Layout -->
+  <div class="page-wrapper">
+
+    <!-- Left: Categories -->
+    <div class="category-side">
+      <div class="category-header">
+        <h1>Discover Ibiza</h1>
+        <p data-lang="en">Our personal favourite spots, hidden gems and everything you need to know for your stay.</p>
+        <p data-lang="de">Unsere persönlichen Lieblingsorte, Geheimtipps und alles, was ihr für euren Aufenthalt wissen müsst.</p>
+      </div>
+
+      <!-- MAP -->
+      <div class="cat-group-single" id="mapNavItem">
+        <span class="cat-emoji">🗺️</span>
+        <span class="cat-label" data-lang="en">Island Map</span>
+        <span class="cat-label" data-lang="de">Inselkarte</span>
+      </div>
+
+      <!-- TRAVEL -->
+      <div class="cat-group" data-category="travel">
+        <div class="cat-group-header">
+          <span class="cat-emoji">✈️</span>
+          <span class="cat-label">Travel</span>
+          <span class="cat-arrow">▸</span>
+        </div>
+        <div class="cat-items">
+          <div class="cat-item" data-detail="d-getting-in">
+            <span class="item-dot travel"></span>
+            <span class="item-label" data-lang="en">Getting In</span>
+            <span class="item-label" data-lang="de">Anreise</span>
+          </div>
+          <div class="cat-item" data-detail="d-accommodation">
+            <span class="item-dot travel"></span>
+            <span class="item-label" data-lang="en">Accommodation</span>
+            <span class="item-label" data-lang="de">Unterkunft</span>
+          </div>
+          <div class="cat-item" data-detail="d-getting-around">
+            <span class="item-dot travel"></span>
+            <span class="item-label" data-lang="en">Getting Around</span>
+            <span class="item-label" data-lang="de">Fortbewegung</span>
+          </div>
+          <div class="cat-item" data-detail="d-shuttle">
+            <span class="item-dot travel"></span>
+            <span class="item-label" data-lang="en">Shuttle Service</span>
+            <span class="item-label" data-lang="de">Shuttle Service</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BEACHES -->
+      <div class="cat-group" data-category="beaches">
+        <div class="cat-group-header">
+          <span class="cat-emoji">🏖️</span>
+          <span class="cat-label" data-lang="en">Beaches</span>
+          <span class="cat-label" data-lang="de">Strände</span>
+          <span class="cat-arrow">▸</span>
+        </div>
+        <div class="cat-items">
+          <div class="cat-item" data-detail="d-cala-dhort"><span class="item-dot beach"></span><span class="item-label">Cala d'Hort</span></div>
+          <div class="cat-item" data-detail="d-platges-comte"><span class="item-dot beach"></span><span class="item-label">Platges de Comte</span></div>
+          <div class="cat-item" data-detail="d-cala-salada"><span class="item-dot beach"></span><span class="item-label">Cala Salada</span></div>
+          <div class="cat-item" data-detail="d-cala-bassa"><span class="item-dot beach"></span><span class="item-label">Cala Bassa</span></div>
+          <div class="cat-item" data-detail="d-ses-salinas"><span class="item-dot beach"></span><span class="item-label">Ses Salinas</span></div>
+          <div class="cat-item" data-detail="d-cala-tarida"><span class="item-dot beach"></span><span class="item-label">Cala Tarida</span></div>
+          <div class="cat-item" data-detail="d-cala-jondal"><span class="item-dot beach"></span><span class="item-label">Cala Jondal</span></div>
+          <div class="cat-item" data-detail="d-cala-nova"><span class="item-dot beach"></span><span class="item-label">Cala Nova</span></div>
+          <div class="cat-item" data-detail="d-benirras"><span class="item-dot beach"></span><span class="item-label">Benirras</span></div>
+        </div>
+      </div>
+
+      <!-- FOOD & DRINK -->
+      <div class="cat-group" data-category="food">
+        <div class="cat-group-header">
+          <span class="cat-emoji">🍽️</span>
+          <span class="cat-label" data-lang="en">Food & Drink</span>
+          <span class="cat-label" data-lang="de">Essen & Trinken</span>
+          <span class="cat-arrow">▸</span>
+        </div>
+        <div class="cat-items">
+          <!-- € -->
+          <div class="cat-item" data-detail="d-llumbi"><span class="item-dot food"></span><span class="item-label">Bargrill Llumbi</span><span class="item-price">€</span></div>
+          <div class="cat-item" data-detail="d-cala-escondida"><span class="item-dot food"></span><span class="item-label">Cala Escondida</span><span class="item-price">€</span></div>
+          <div class="cat-item" data-detail="d-ritas-cantina"><span class="item-dot food"></span><span class="item-label">Rita's Cantina</span><span class="item-price">€</span></div>
+          <div class="cat-item" data-detail="d-can-bellotera"><span class="item-dot food"></span><span class="item-label">Bar Can Bellotera</span><span class="item-price">€</span></div>
+          <div class="cat-item" data-detail="d-fish-shack"><span class="item-dot food"></span><span class="item-label">Fish Shack</span><span class="item-price">€</span></div>
+          <div class="cat-item" data-detail="d-bar-anita"><span class="item-dot food"></span><span class="item-label">Bar Anita</span><span class="item-price">€</span></div>
+          <!-- €€ -->
+          <div class="cat-item" data-detail="d-sespartar"><span class="item-dot food"></span><span class="item-label">S'Espartar</span><span class="item-price">€€</span></div>
+          <div class="cat-item" data-detail="d-ses-roques"><span class="item-dot food"></span><span class="item-label">Ses Roques</span><span class="item-price">€€</span></div>
+          <div class="cat-item" data-detail="d-es-nautic"><span class="item-dot food"></span><span class="item-label">Es Nautic</span><span class="item-price">€€</span></div>
+          <div class="cat-item" data-detail="d-can-berri"><span class="item-dot food"></span><span class="item-label">Bar Can Berri</span><span class="item-price">€€</span></div>
+          <div class="cat-item" data-detail="d-can-alfredo"><span class="item-dot food"></span><span class="item-label">C'an Alfredo</span><span class="item-price">€€</span></div>
+          <div class="cat-item" data-detail="d-cami-balafia"><span class="item-dot food"></span><span class="item-label">Cami de Balafia</span><span class="item-price">€€</span></div>
+          <!-- €€€ -->
+          <div class="cat-item" data-detail="d-tropicana"><span class="item-dot food"></span><span class="item-label">Tropicana</span><span class="item-price">€€€</span></div>
+          <div class="cat-item" data-detail="d-ses-boques"><span class="item-dot food"></span><span class="item-label">Ses Boques</span><span class="item-price">€€€</span></div>
+          <div class="cat-item" data-detail="d-sa-caleta"><span class="item-dot food"></span><span class="item-label">Restaurante Sa Caleta</span><span class="item-price">€€€</span></div>
+          <div class="cat-item" data-detail="d-es-boldado"><span class="item-dot food"></span><span class="item-label">Es Boldado</span><span class="item-price">€€€</span></div>
+          <div class="cat-item" data-detail="d-hostal-la-torre"><span class="item-dot food"></span><span class="item-label">Hostal La Torre</span><span class="item-price">€€€</span></div>
+          <div class="cat-item" data-detail="d-experimental"><span class="item-dot food"></span><span class="item-label">Experimental Beach</span><span class="item-price">€€€</span></div>
+          <div class="cat-item" data-detail="d-la-bodega"><span class="item-dot food"></span><span class="item-label">La Bodega</span><span class="item-price">€€€</span></div>
+          <div class="cat-item" data-detail="d-aubergine"><span class="item-dot food"></span><span class="item-label">Aubergine</span><span class="item-price">€€€</span></div>
+        </div>
+      </div>
+
+      <!-- ACTIVITIES -->
+      <div class="cat-group" data-category="activities">
+        <div class="cat-group-header">
+          <span class="cat-emoji">✨</span>
+          <span class="cat-label" data-lang="en">Activities</span>
+          <span class="cat-label" data-lang="de">Aktivitäten</span>
+          <span class="cat-arrow">▸</span>
+        </div>
+        <div class="cat-items">
+          <div class="cat-item" data-detail="d-old-town"><span class="item-dot activity"></span><span class="item-label" data-lang="en">Old Town & Fortress</span><span class="item-label" data-lang="de">Altstadt & Festung</span></div>
+          <div class="cat-item" data-detail="d-can-jordi"><span class="item-dot activity"></span><span class="item-label">Can Jordi Live Music</span></div>
+          <div class="cat-item" data-detail="d-nightlife"><span class="item-dot activity"></span><span class="item-label">Nightlife</span></div>
+          <div class="cat-item" data-detail="d-sunset"><span class="item-dot activity"></span><span class="item-label" data-lang="en">Sunset Spots</span><span class="item-label" data-lang="de">Sonnenuntergang</span></div>
+          <div class="cat-item" data-detail="d-aquarium"><span class="item-dot activity"></span><span class="item-label">Aquarium</span></div>
+          <div class="cat-item" data-detail="d-hippy-market"><span class="item-dot activity"></span><span class="item-label">Hippy Market Las Dalias</span></div>
+          <div class="cat-item" data-detail="d-formentera"><span class="item-dot activity"></span><span class="item-label">Formentera</span></div>
+          <div class="cat-item" data-detail="d-north"><span class="item-dot activity"></span><span class="item-label" data-lang="en">Northern Villages</span><span class="item-label" data-lang="de">Dörfer im Norden</span></div>
+          <div class="cat-item" data-detail="d-spa"><span class="item-dot activity"></span><span class="item-label">Spa Day</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Detail view -->
+    <div class="content-side">
+      <div class="detail-view">
+
+        <div class="detail-placeholder" id="detailPlaceholder">
+          <h2 style="font-family:var(--font-heading);font-weight:400;font-size:1.6rem;margin-bottom:0.3rem;" data-lang="en">Our Ibiza Map</h2>
+          <h2 style="font-family:var(--font-heading);font-weight:400;font-size:1.6rem;margin-bottom:0.3rem;" data-lang="de">Unsere Ibiza-Karte</h2>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1rem;" data-lang="en">Tap a pin to jump to the details</p>
+          <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1rem;" data-lang="de">Tippe auf einen Pin für Details</p>
+          <div class="map-legend">
+            <span class="map-legend-item"><span class="map-legend-dot beach"></span><span data-lang="en">Beaches</span><span data-lang="de">Strände</span></span>
+            <span class="map-legend-item"><span class="map-legend-dot food"></span><span data-lang="en">Food & Drink</span><span data-lang="de">Essen & Trinken</span></span>
+            <span class="map-legend-item"><span class="map-legend-dot activity"></span><span data-lang="en">Activities</span><span data-lang="de">Aktivitäten</span></span>
+          </div>
+          <div id="mapContainer"></div>
+        </div>
+
+        <!-- ===== TRAVEL CARDS ===== -->
+
+        <div class="detail-card" id="d-getting-in">
+          <div class="detail-category-label">Travel</div>
+          <h2 data-lang="en">Getting In</h2>
+          <h2 data-lang="de">Anreise</h2>
+          <img class="detail-img" src="img/travel/Getting In.jpeg" alt="Ibiza Airport">
+          <div class="detail-body">
+            <p data-lang="en">You can fly to Ibiza airport which is easily accessible during the summer months from any major European airport. Please plan your trip so that you will already be available by lunchtime on the 12th of September.</p>
+            <p data-lang="de">Du solltest zum Flughafen Ibiza fliegen, der in den Sommermonaten von allen größeren europäischen Flughäfen aus gut erreichbar ist. Bitte plane deine Reise so, dass du am 12. September schon zur Mittagszeit verfügbar bist.</p>
+          </div>
+          <a class="detail-map-link" href="https://www.google.com/maps/place/Ibiza+Airport" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span>
+          </a>
+        </div>
+
+        <div class="detail-card" id="d-accommodation">
+          <div class="detail-category-label">Travel</div>
+          <h2 data-lang="en">Accommodation</h2>
+          <h2 data-lang="de">Unterkunft</h2>
+          <img class="detail-img" src="img/travel/Accommodation.jpg" alt="Ibiza accommodation">
+          <div class="detail-body">
+            <p data-lang="en">When arranging your accommodation, we encourage you to find a place in the south of the island. Ibiza, Sant Antoni or Sant Josep are all in close proximity to our wedding venue. There are a wide variety of hotels and AirBnBs available on the island.</p>
+            <p data-lang="de">Bei der Suche nach einer Unterkunft empfehlen wir dir, dich im Süden der Insel umzusehen. Ibiza, Sant Antoni oder Sant Josep liegen alle in unmittelbarer Nähe zu unserer Hochzeitslocation. Auf der Insel gibt es eine große Auswahl an Hotels und AirBnBs.</p>
+            <div class="detail-tip">
+              <strong data-lang="en">Our tips:</strong>
+              <strong data-lang="de">Unsere Tipps:</strong>
+              <ul class="spot-list" style="margin-top:0.5rem;">
+                <li><span class="spot-name"><a href="https://www.ibizahotelp.com/de" target="_blank" rel="noopener">Hotel Portmany</a></span> — <span data-lang="en">centrally located in Sant Antoni, right on the promenade</span><span data-lang="de">zentral in Sant Antoni, direkt an der Promenade</span></li>
+                <li><span class="spot-name"><a href="https://aparthotelpuertovadella.theibizahotels.com/en/" target="_blank" rel="noopener">Aparthotel Puerto Cala Vadella</a></span> — <span data-lang="en">relaxed aparthotel in the beautiful bay of Cala Vadella</span><span data-lang="de">entspanntes Aparthotel in der schönen Bucht von Cala Vadella</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card" id="d-getting-around">
+          <div class="detail-category-label">Travel</div>
+          <h2 data-lang="en">Getting Around</h2>
+          <h2 data-lang="de">Fortbewegung</h2>
+          <img class="detail-img" src="img/travel/Getting Around.avif" alt="Ibiza road">
+          <div class="detail-body">
+            <p data-lang="en">We strongly recommend renting a car as early as possible — availability gets tight during peak season. While the island isn't huge, everything is spread out across winding roads, and getting from A to B without your own wheels can be a real hassle. Uber and local taxis do exist, but they are limited in availability and add up quickly cost-wise. With a rental car you'll have the freedom to explore hidden beaches, cliff-side restaurants, and sunset spots at your own pace.</p>
+            <p data-lang="de">Wir empfehlen dringend, so früh wie möglich einen Mietwagen zu organisieren — in der Hochsaison sind die Verfügbarkeiten schnell ausgeschöpft. Die Insel ist zwar nicht riesig, aber alles ist über kurvige Straßen verstreut, und ohne eigenes Auto wird es schnell umständlich. Uber und lokale Taxis gibt es zwar, aber sie sind nur begrenzt verfügbar und werden schnell teuer. Mit einem Mietwagen habt ihr die Freiheit, versteckte Strände, Klippen-Restaurants und Sunset Spots in eurem eigenen Tempo zu erkunden.</p>
+          </div>
+        </div>
+
+        <div class="detail-card" id="d-shuttle">
+          <div class="detail-category-label">Travel</div>
+          <h2 data-lang="en">Shuttle Service</h2>
+          <h2 data-lang="de">Shuttle Service</h2>
+          <img class="detail-img" src="img/travel/Shuttle Service.jpg" alt="Shuttle Service">
+          <div class="detail-body">
+            <p data-lang="en">We will provide a complimentary shuttle to and from the venue on the day of the wedding (September 13th). Pickup points:</p>
+            <p data-lang="de">Wir bieten am Hochzeitstag (13. September) einen kostenlosen Shuttle zur und von der Location an. Abholpunkte:</p>
+            <ul class="spot-list">
+              <li><span class="spot-name">Ibiza Town / Eivissa</span></li>
+              <li><span class="spot-name">Sant Antoni de Portmany</span></li>
+              <li><span class="spot-name">Sant Josep de sa Talaia</span></li>
+            </ul>
+            <div class="detail-tip">
+              <strong>Note:</strong>
+              <span data-lang="en">Exact pickup times will be shared closer to the wedding date.</span>
+              <span data-lang="de">Die genauen Abholzeiten werden näher am Hochzeitstag bekannt gegeben.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== BEACH CARDS ===== -->
+
+        <div class="detail-card" id="d-cala-dhort">
+          <div class="detail-category-label" data-lang="en">Beaches — South</div>
+          <div class="detail-category-label" data-lang="de">Strände — Süden</div>
+          <h2>Cala d'Hort</h2>
+          <img class="detail-img" src="img/beaches/cala-dhort.jpg" alt="Cala d'Hort">
+          <div class="detail-body">
+            <p data-lang="en">One of Ibiza's most iconic beaches with a breathtaking view of the mystical Es Vedrà rock. The water is crystal-clear and the atmosphere truly magical — especially at sunset. A mix of sand and pebbles, so bring water shoes. There are two small chiringuitos for drinks and snacks. Arrive early in summer as parking fills up fast.</p>
+            <p data-lang="de">Einer der bekanntesten Strände Ibizas mit einem atemberaubenden Blick auf den mystischen Felsen Es Vedrà. Das Wasser ist kristallklar und die Atmosphäre besonders bei Sonnenuntergang magisch. Ein Mix aus Sand und Kiesel — Badeschuhe empfehlenswert. Es gibt zwei kleine Chiringuitos für Getränke und Snacks. Im Sommer früh kommen, die Parkplätze sind schnell voll.</p>
+          </div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/S5pA3JVVwJBsv1js8" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span>
+          </a>
+        </div>
+
+        <div class="detail-card" id="d-platges-comte">
+          <div class="detail-category-label" data-lang="en">Beaches — South</div>
+          <div class="detail-category-label" data-lang="de">Strände — Süden</div>
+          <h2>Platges de Comte</h2>
+          <img class="detail-img" src="img/beaches/cala-comte.jpg" alt="Platges de Comte">
+          <div class="detail-body">
+            <p data-lang="en">Often voted Ibiza's most beautiful beach — and for good reason. A series of small sandy coves with impossibly turquoise water and views of the offshore islands. The sunsets here are legendary. Several beach bars and restaurants along the shore. Gets busy in peak season, so an early arrival is key.</p>
+            <p data-lang="de">Wird oft zum schönsten Strand Ibizas gewählt — und das zu Recht. Mehrere kleine Sandbuchten mit unglaublich türkisem Wasser und Blick auf die vorgelagerten Inseln. Die Sonnenuntergänge hier sind legendär. Mehrere Strandbars und Restaurants entlang der Küste. In der Hochsaison kann es voll werden, also am besten früh kommen.</p>
+          </div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/aPrJgBvHaTXUP7NA8" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span>
+          </a>
+        </div>
+
+        <div class="detail-card" id="d-cala-salada">
+          <div class="detail-category-label" data-lang="en">Beaches — South</div><div class="detail-category-label" data-lang="de">Strände — Süden</div>
+          <h2>Cala Salada</h2>
+          <img class="detail-img" src="img/beaches/cala-salada.jpg" alt="Cala Salada">
+          <div class="detail-body">
+            <p data-lang="en">A hidden gem tucked between pine-covered cliffs near San Antonio. The water is an incredible shade of turquoise. In high season, car access is restricted — you'll need to take a shuttle bus or walk down from the parking area. Totally worth the effort! Next to it you'll find the smaller Cala Saladeta, which is even more secluded.</p>
+            <p data-lang="de">Ein verstecktes Juwel zwischen pinienbedeckten Klippen nahe San Antonio. Das Wasser hat ein unglaubliches Türkis. In der Hochsaison ist die Zufahrt gesperrt — man muss den Shuttlebus nehmen oder vom Parkplatz hinunterlaufen. Absolut lohnenswert! Nebenan liegt die kleinere Cala Saladeta, die noch abgeschiedener ist.</p>
+          </div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/ffhdFwHrCMtxGqus8" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-cala-bassa">
+          <div class="detail-category-label" data-lang="en">Beaches — South</div><div class="detail-category-label" data-lang="de">Strände — Süden</div>
+          <h2>Cala Bassa</h2>
+          <img class="detail-img" src="img/beaches/cala-bassa.jpg" alt="Cala Bassa">
+          <div class="detail-body"><p data-lang="en">A large, family-friendly bay with soft sand and shallow turquoise water. Pine trees along the shore provide natural shade — perfect if you want a break from the sun. Home to the popular CBbC Beach Club with great food and music. Easy to reach from San Antonio and plenty of parking available.</p><p data-lang="de">Eine große, familienfreundliche Bucht mit feinem Sand und flachem türkisem Wasser. Pinien am Ufer spenden natürlichen Schatten — perfekt für eine Pause von der Sonne. Hier befindet sich der beliebte CBbC Beach Club mit gutem Essen und Musik. Leicht von San Antonio erreichbar mit ausreichend Parkplätzen.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/mX6qDUbZuiqQzVDc6" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-ses-salinas">
+          <div class="detail-category-label" data-lang="en">Beaches — South</div><div class="detail-category-label" data-lang="de">Strände — Süden</div>
+          <h2>Ses Salinas</h2>
+          <img class="detail-img" src="img/beaches/ses-salinas.jpg" alt="Ses Salinas">
+          <div class="detail-body"><p data-lang="en">A long, stunning beach in the south of the island, part of a protected natural park. Known for its trendy beach clubs like Sa Trinxa and Jockey Club, yet still retaining a relaxed bohemian vibe. The shallow, crystal-clear water stretches for hundreds of metres. Great for a full beach day with good food and drinks right on the sand.</p><p data-lang="de">Ein langer, wunderschöner Strand im Süden der Insel, Teil eines geschützten Naturparks. Bekannt für trendige Beachclubs wie Sa Trinxa und Jockey Club, aber dennoch mit einer entspannten, bohemischen Atmosphäre. Das flache, kristallklare Wasser erstreckt sich über hunderte Meter. Perfekt für einen ganzen Strandtag mit gutem Essen und Drinks direkt am Sand.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/a4DEpbcd4TDx4HBZ7" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-cala-tarida">
+          <div class="detail-category-label" data-lang="en">Beaches — South</div><div class="detail-category-label" data-lang="de">Strände — Süden</div>
+          <h2>Cala Tarida</h2>
+          <img class="detail-img" src="img/beaches/cala-tarida.jpg" alt="Cala Tarida">
+          <div class="detail-body"><p data-lang="en">A wide, golden sandy beach on the west coast with calm, shallow waters — ideal for swimming. The beach faces west, making it one of the best spots to watch the sunset. Several good restaurants and beach bars nearby. Less crowded than some of the more famous beaches, with a relaxed and welcoming atmosphere.</p><p data-lang="de">Ein breiter, goldener Sandstrand an der Westküste mit ruhigem, flachem Wasser — ideal zum Schwimmen. Der Strand liegt nach Westen, was ihn zu einem der besten Orte für Sonnenuntergänge macht. Mehrere gute Restaurants und Strandbars in der Nähe. Weniger überlaufen als andere bekannte Strände, mit einer entspannten und einladenden Atmosphäre.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/KcwZ6oPV95G2hjVU7" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-cala-jondal">
+          <div class="detail-category-label" data-lang="en">Beaches — South</div><div class="detail-category-label" data-lang="de">Strände — Süden</div>
+          <h2>Cala Jondal</h2>
+          <img class="detail-img" src="img/beaches/cala-jondal.jpg" alt="Cala Jondal">
+          <div class="detail-body"><p data-lang="en">Home to the famous Blue Marlin beach club — one of Ibiza's most glamorous beach spots. A pebble beach with crystal-clear water surrounded by dramatic cliffs. The vibe here is upscale and lively, perfect for those who enjoy a see-and-be-seen atmosphere. Several excellent restaurants and cocktail bars along the shore.</p><p data-lang="de">Heimat des berühmten Blue Marlin Beach Clubs — einer der glamourösesten Strandorte Ibizas. Ein Kiesstrand mit kristallklarem Wasser, umgeben von dramatischen Klippen. Die Atmosphäre ist gehoben und lebhaft, perfekt für alle, die die Sehen-und-gesehen-werden-Szene mögen. Mehrere ausgezeichnete Restaurants und Cocktailbars entlang der Küste.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/jNpBEptQjZXH6zXf9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-cala-nova">
+          <div class="detail-category-label" data-lang="en">Beaches — North</div><div class="detail-category-label" data-lang="de">Strände — Norden</div>
+          <h2>Cala Nova</h2>
+          <img class="detail-img" src="img/beaches/cala-nova.jpg" alt="Cala Nova">
+          <div class="detail-body"><p data-lang="en">A beautiful wide beach on the east coast, popular with surfers when the waves pick up. Soft golden sand and a laid-back, bohemian feel — close to the famous Atzaró agrotourism hotel and the Las Dalias hippy market. Great beach restaurants like Atzaró Beach and Aiyanna serve fresh Mediterranean food with your feet in the sand.</p><p data-lang="de">Ein wunderschöner breiter Strand an der Ostküste, bei Surfern beliebt wenn die Wellen aufkommen. Weicher goldener Sand und ein entspanntes, bohemisches Flair — nahe dem berühmten Agrotourismus-Hotel Atzaró und dem Hippiemarkt Las Dalias. Tolle Strandrestaurants wie Atzaró Beach und Aiyanna servieren frische mediterrane Küche mit den Füßen im Sand.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/k22FaQt3uupQxUJs9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-benirras">
+          <div class="detail-category-label" data-lang="en">Beaches — North</div><div class="detail-category-label" data-lang="de">Strände — Norden</div>
+          <h2>Benirras</h2>
+          <img class="detail-img" src="img/beaches/benirras.jpg" alt="Benirras">
+          <div class="detail-body"><p data-lang="en">A magical cove in the north, famous for its Sunday sunset drum circles where locals and visitors gather to play music as the sun goes down behind the iconic Cap Bernat rock. The atmosphere is bohemian and spiritual — a true Ibiza experience. The beach is pebbly with calm, clear water. Come early on Sundays to grab a spot, or visit on other days for a more peaceful swim.</p><p data-lang="de">Eine magische Bucht im Norden, berühmt für die sonntäglichen Trommelkreise bei Sonnenuntergang, bei denen Einheimische und Besucher gemeinsam Musik machen, während die Sonne hinter dem markanten Felsen Cap Bernat verschwindet. Die Atmosphäre ist bohemisch und spirituell — ein echtes Ibiza-Erlebnis. Der Strand ist kiesig mit ruhigem, klarem Wasser. Sonntags früh kommen um einen Platz zu sichern, oder an anderen Tagen für ein ruhigeres Bad vorbeischauen.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/tKhdrAcJsvcG9Qxt9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <!-- ===== FOOD CARDS (selection of highlights) ===== -->
+
+        <div class="detail-card" id="d-sespartar">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>S'Espartar</h2><div class="detail-price">€€</div>
+          <img class="detail-img" src="img/food/S'Espartar.jpg" alt="S'Espartar">
+          <div class="detail-body"><p data-lang="en">A true institution in Sant Josep, S'Espartar is one of the island's finest traditional fish restaurants. The family-run kitchen specialises in rice dishes, Bullit de Peix (the classic Ibizan fish stew) and fresh catch of the day — all prepared with recipes passed down through generations. Very popular with locals, which is always a good sign. Book ahead, especially on weekends.</p><p data-lang="de">Eine echte Institution in Sant Josep — S'Espartar ist eines der besten traditionellen Fischrestaurants der Insel. Die familiengeführte Küche ist spezialisiert auf Reisgerichte, Bullit de Peix (den klassischen ibizenkischen Fischeintopf) und fangfrischen Tagesfisch — alles nach Rezepten, die seit Generationen weitergegeben werden. Sehr beliebt bei Einheimischen, was immer ein gutes Zeichen ist. Reservierung empfohlen, besonders am Wochenende.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/PSyH3cVzWJCCu7mt7" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-llumbi">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Bargrill Llumbi</h2><div class="detail-price">€</div>
+          <img class="detail-img" src="img/food/Bargrill Llumbi.jpg" alt="Bargrill Llumbi">
+          <div class="detail-body"><p data-lang="en">A hidden gem in Es Cubells with one of the best views on the entire island. This small, family-run grill serves simple, fresh Mediterranean food with love and attention — garlic prawns, grilled sole, and superb homemade desserts. The portions are generous and the prices unbeatable. Limited seating, so booking is essential. If something isn't on the menu, they'll cook it for you.</p><p data-lang="de">Ein Geheimtipp in Es Cubells mit einer der besten Aussichten auf der gesamten Insel. Dieser kleine, familiär geführte Grill serviert einfaches, frisches mediterranes Essen mit Liebe und Sorgfalt — Knoblauchgarnelen, gegrillte Seezunge und hervorragende hausgemachte Desserts. Die Portionen sind großzügig und die Preise unschlagbar. Begrenzte Plätze, Reservierung unbedingt empfohlen. Wenn etwas nicht auf der Karte steht, kochen sie es auf Wunsch.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/76njAG9HnWUAjmiq5" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-tropicana">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Tropicana</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/Tropicana.webp" alt="Tropicana">
+          <div class="detail-body"><p data-lang="en">One of our absolute favourites! Tropicana has been a Cala Jondal institution since 1988, run by the same family ever since. The Mediterranean kitchen serves incredible fresh fish — try the sea bass in salt crust or the tuna tartar. Beyond the restaurant, there are sun loungers with waiter service, a massage pavilion and even a kids' area. The perfect spot for an entire beach day with amazing food. Booking recommended.</p><p data-lang="de">Einer unserer absoluten Favoriten! Tropicana ist seit 1988 eine Institution an der Cala Jondal, geführt von der gleichen Familie. Die mediterrane Küche serviert unglaublich frischen Fisch — probiert den Wolfsbarsch in Salzkruste oder das Thunfisch-Tartar. Neben dem Restaurant gibt es Sonnenliegen mit Kellnerservice, einen Massage-Pavillon und sogar einen Kinderbereich. Der perfekte Ort für einen ganzen Strandtag mit fantastischem Essen. Reservierung empfohlen.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/5dD1HnD4jZiJwcBf8" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-ses-boques">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Ses Boques</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/Ses Boques.jpg" alt="Ses Boques">
+          <div class="detail-body"><p data-lang="en">Perched on the dramatic cliffs of Es Cubells with stunning views across to Formentera. This seafood restaurant sits right on a tiny, secluded beach and serves some of the freshest fish on the island — the lobster with garlic and fried eggs is legendary, as is the sea bass in salt. More locals than tourists, which says it all. Open from lunch until sunset in summer. Definitely book a table, especially in July and August.</p><p data-lang="de">Auf den dramatischen Klippen von Es Cubells gelegen, mit atemberaubendem Blick auf Formentera. Dieses Fischrestaurant liegt direkt an einem kleinen, abgeschiedenen Strand und serviert den frischesten Fisch der Insel — der Hummer mit Knoblauch und Spiegelei ist legendär, ebenso der Wolfsbarsch in Salzkruste. Mehr Einheimische als Touristen, was alles sagt. Im Sommer von mittags bis Sonnenuntergang geöffnet. Reservierung unbedingt empfohlen, besonders im Juli und August.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/u5SXDMjXfckVdKVe9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-sa-caleta">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Restaurante Sa Caleta</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/Restaurante Sa Caleta.jpg" alt="Restaurante Sa Caleta">
+          <div class="detail-body"><p data-lang="en">Run by the Pujolet family — descendants of local fishermen — since 1988, Sa Caleta is nestled between ochre cliffs and turquoise sea on a picturesque little beach. The menu is all about traditional Ibizan seafood: Bullit de Peix, lobster stew, and beautifully baked fish. Don't leave without trying the famous Café Caleta — a flambéed mix of brandy, cinnamon, citrus and coffee, invented by the family's grandfather. Open all year round, one of the few beach restaurants that never closes.</p><p data-lang="de">Seit 1988 von der Familie Pujolet — Nachkommen lokaler Fischer — geführt, liegt Sa Caleta eingebettet zwischen ockerfarbenen Klippen und türkisem Meer an einem malerischen kleinen Strand. Auf der Karte stehen traditionelle ibizenkische Meeresfrüchte: Bullit de Peix, Hummersuppe und wunderbar gebackener Fisch. Unbedingt den berühmten Café Caleta probieren — ein flambierter Mix aus Brandy, Zimt, Zitrus und Kaffee, erfunden vom Großvater der Familie. Ganzjährig geöffnet — eines der wenigen Strandrestaurants, das nie schließt.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/X8kAtGN71aQf8mPU7" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-es-boldado">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Es Boldado</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/Es Boldado.jpg" alt="Es Boldado">
+          <div class="detail-body"><p data-lang="en">Possibly the most iconic dining view in all of Ibiza — perched high on a cliff edge above Cala d'Hort, looking straight out at the mystical Es Vedrà and Es Vedranell islands. The Tur Torres family has run this place for over 30 years, serving excellent fish, rice dishes and their famous Bullit de Peix. No phone signal up here, which only adds to the magic. Access is via a dusty dirt track — that's part of the adventure. A sunset dinner here is unforgettable.</p><p data-lang="de">Vermutlich die ikonischste Restaurant-Aussicht auf ganz Ibiza — hoch auf einer Klippe über der Cala d'Hort, mit direktem Blick auf die mystischen Inseln Es Vedrà und Es Vedranell. Die Familie Tur Torres führt diesen Ort seit über 30 Jahren und serviert exzellenten Fisch, Reisgerichte und den berühmten Bullit de Peix. Kein Handyempfang hier oben, was den Zauber nur verstärkt. Die Zufahrt über eine staubige Schotterpiste gehört zum Abenteuer dazu. Ein Abendessen bei Sonnenuntergang hier ist unvergesslich.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/hhTvvWY1wWbiuaqb8" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-ses-roques">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Ses Roques</h2><div class="detail-price">€€</div>
+          <img class="detail-img" src="img/food/Ses Roques.jpg" alt="Ses Roques">
+          <div class="detail-body"><p data-lang="en">Sitting on the rugged cliffs of Cala Conta, Ses Roques combines excellent seafood with what might be Ibiza's most beautiful sunset panorama. The rustic wooden terrace with candlelit tables creates an intimate, romantic atmosphere — perfect for a special evening. The seafood paella and fresh fish are outstanding. Dinner service starts in the late afternoon, timed perfectly for sunset. One of our go-to spots.</p><p data-lang="de">Auf den rauen Klippen der Cala Conta gelegen, verbindet Ses Roques hervorragende Meeresfrüchte mit dem vielleicht schönsten Sonnenuntergangspanorama Ibizas. Die rustikale Holzterrasse mit kerzenbeschienenen Tischen schafft eine intime, romantische Atmosphäre — perfekt für einen besonderen Abend. Die Meeresfrüchte-Paella und der frische Fisch sind hervorragend. Der Abendservice beginnt am späten Nachmittag, perfekt getimt für den Sonnenuntergang. Einer unserer Stammorte.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/jgr7oVyaNtJavTiv6" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-cala-escondida">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Cala Escondida</h2><div class="detail-price">€</div>
+          <img class="detail-img" src="img/food/Cala Escondida.jpg" alt="Cala Escondida">
+          <div class="detail-body"><p data-lang="en">Sabrina's favourite chiringuito — and for good reason. This 100% sustainable beach bar sits in a tiny cove right next to Cala Comte, run by solar power and with zero waste. No music here, just the sound of the waves. The menu is simple and delicious with great vegetarian and vegan options — try the curry chicken wrap or the homemade guacamole. No reservations, just show up and grab a spot. The kind of place that makes you fall in love with Ibiza.</p><p data-lang="de">Sabrinas Lieblings-Chiringuito — und das aus gutem Grund. Diese 100% nachhaltige Strandbar liegt in einer kleinen Bucht direkt neben Cala Comte, betrieben mit Solarstrom und Zero Waste. Keine Musik hier, nur das Rauschen der Wellen. Die Karte ist einfach und köstlich, mit tollen vegetarischen und veganen Optionen — probiert den Curry-Chicken-Wrap oder die hausgemachte Guacamole. Keine Reservierung, einfach vorbeikommen und einen Platz ergattern. Die Art von Ort, die einen in Ibiza verlieben lässt.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/UsuoN5J8Gn8RR3pt5" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-hostal-la-torre">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Hostal La Torre</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/Hostal La Torre.jpg" alt="Hostal La Torre">
+          <div class="detail-body"><p data-lang="en">Set on the rocky outcrops of Cap Negret just outside San Antonio, La Torre is the ultimate sunset experience. The terrace offers uninterrupted views over the Mediterranean, accompanied by resident DJs spinning a truly Balearic soundtrack. Their cocktail list is exceptional — try the signature "La Torre Sunset" with vodka, strawberry, lemon and cava. The Mediterranean kitchen serves sharing-style tapas, fresh seafood and hearty mains. Come for sunset, stay for dinner.</p><p data-lang="de">Auf den felsigen Klippen von Cap Negret kurz außerhalb von San Antonio gelegen, bietet La Torre das ultimative Sonnenuntergangs-Erlebnis. Die Terrasse bietet freien Blick über das Mittelmeer, begleitet von Resident-DJs mit einem echten Balearic-Soundtrack. Die Cocktailkarte ist herausragend — probiert den Signature-Cocktail "La Torre Sunset" mit Wodka, Erdbeere, Zitrone und Cava. Die mediterrane Küche serviert Tapas zum Teilen, frische Meeresfrüchte und herzhafte Hauptgerichte. Zum Sonnenuntergang kommen, zum Abendessen bleiben.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/vjeNQBXaQpSQKd2f7" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-ritas-cantina">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Rita's Cantina</h2><div class="detail-price">€</div>
+          <img class="detail-img" src="img/food/Rita's Cantina.webp" alt="Rita's Cantina">
+          <div class="detail-body"><p data-lang="en">A San Antonio institution since 1995, Rita's is the perfect spot for a relaxed breakfast or lunch overlooking the marina. Their famous club sandwich has been on the menu since day one, and the crepes are excellent too. Fresh juices, quality coffee, and a great outdoor terrace with harbour views. Open from 8am, no reservations — just walk in. Affordable and consistently good.</p><p data-lang="de">Eine Institution in San Antonio seit 1995 — Rita's ist der perfekte Ort für ein entspanntes Frühstück oder Mittagessen mit Blick auf den Yachthafen. Das berühmte Club Sandwich steht seit Tag eins auf der Karte, und die Crêpes sind ebenfalls hervorragend. Frische Säfte, guter Kaffee und eine tolle Außenterrasse mit Hafenblick. Geöffnet ab 8 Uhr, keine Reservierung — einfach reinkommen. Günstig und konstant gut.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/fkvznh5FHLrX135x9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-es-nautic">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Es Nautic</h2><div class="detail-price">€€</div>
+          <img class="detail-img" src="img/food/Es Nautic.jpg" alt="Es Nautic">
+          <div class="detail-body"><p data-lang="en">Located over the pontoons of the Sant Antoni Yacht Club, Es Nautic offers modern, sleek architecture that seems to emerge from the sea. The views across the bay are stunning, and the harbour is filled with traditional Ibizan llaüt boats. Fresh fish, seafood, rice dishes and a great wine selection — the non-stop kitchen from 1pm makes it ideal for a leisurely lunch. In summer, the upper terrace opens for sunset cocktails. A real local gem.</p><p data-lang="de">Über den Stegen des Sant Antoni Yacht Clubs gelegen, besticht Es Nautic durch moderne, elegante Architektur, die direkt aus dem Meer zu wachsen scheint. Der Blick über die Bucht ist atemberaubend, und der Hafen ist voller traditioneller ibizenkischer Llaüt-Boote. Frischer Fisch, Meeresfrüchte, Reisgerichte und eine tolle Weinauswahl — die durchgehend geöffnete Küche ab 13 Uhr macht es ideal für ein ausgedehntes Mittagessen. Im Sommer öffnet die obere Terrasse für Sunset-Cocktails. Ein echtes Juwel der Einheimischen.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/tGH5Zg7j9hxX9Wqr5" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-can-berri">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Bar Can Berri</h2><div class="detail-price">€€</div>
+          <img class="detail-img" src="img/food/Bar Can Berri.jpg" alt="Bar Can Berri">
+          <div class="detail-body"><p data-lang="en">Set in an old traditional Ibizan house next to the beautiful Church of Sant Agustí, Can Berri opens its enchanting back garden in summer — tables tucked closely together beneath orange and carob trees, with tiny lamps creating a magical atmosphere under the stars. The food is simple but delicious, using high-quality local produce. Locals and tourists mingle here over good wine and honest cooking. One of the most romantic dinner spots on the island.</p><p data-lang="de">In einem alten, traditionellen ibizenkischen Haus neben der wunderschönen Kirche von Sant Agustí gelegen, öffnet Can Berri im Sommer seinen zauberhaften Garten — Tische eng beieinander unter Orangen- und Johannisbrotbäumen, mit kleinen Lämpchen, die unter dem Sternenhimmel eine magische Atmosphäre schaffen. Das Essen ist einfach, aber köstlich, mit hochwertigen lokalen Produkten. Einheimische und Touristen treffen sich hier bei gutem Wein und ehrlicher Küche. Einer der romantischsten Dinner-Orte der Insel.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/64kVqfME2zzM3FF97" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-can-bellotera">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Bar Can Bellotera</h2><div class="detail-price">€</div>
+          <img class="detail-img" src="img/food/Bar Can Bellotera.jpeg" alt="Bar Can Bellotera">
+          <div class="detail-body"><p data-lang="en">Located in the village of Sant Jordi, this unassuming local bar serves what many consider the best bocadillos (sandwiches) on the entire island. Fresh ingredients, homemade flavours, and prices that are almost unheard of in Ibiza — coffee for under €2! Perfect for a quick breakfast or lunch stop. The goat cheese salad and the hamburgers are also excellent. A bit off the beaten path, but absolutely worth the 10-minute drive.</p><p data-lang="de">In Sant Jordi gelegen, serviert diese unscheinbare Bar, was viele als die besten Bocadillos (Sandwiches) der gesamten Insel betrachten. Frische Zutaten, hausgemachte Aromen und Preise, die auf Ibiza fast unbekannt sind — Kaffee unter 2€! Perfekt für ein schnelles Frühstück oder Mittagessen. Der Ziegenkäsesalat und die Hamburger sind ebenfalls hervorragend. Etwas abseits der üblichen Pfade, aber die 10-minütige Fahrt absolut wert.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/NdaytPobPxPUkH4y6" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-experimental">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Experimental Beach</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/Experimental Beach.webp" alt="Experimental Beach">
+          <div class="detail-body"><p data-lang="en">Hidden in the protected Ses Salines salt flats at Cap des Falco, Experimental Beach is one of Ibiza's hottest sunset destinations. Part of the renowned Experimental Cocktail Club group (Paris, London, New York), it combines exquisite Mediterranean cuisine with bespoke cocktails and a bohemian-chic atmosphere. Luxe sunbeds, Acapulco chairs, and an outdoor dining room designed by Dorothée Meilichzon. Be prepared for an adventurous road to get there — the bumpy dirt track is part of the experience. Restaurant open non-stop from 1pm to 11pm.</p><p data-lang="de">Versteckt im geschützten Naturpark der Ses Salines Salzfelder am Cap des Falco, ist Experimental Beach eines der angesagtesten Sonnenuntergangsziele Ibizas. Teil der renommierten Experimental Cocktail Club Gruppe (Paris, London, New York), verbindet es exquisite mediterrane Küche mit maßgeschneiderten Cocktails und einer bohemisch-schicken Atmosphäre. Luxuriöse Sonnenliegen, Acapulco-Stühle und ein Outdoor-Speisebereich gestaltet von Dorothée Meilichzon. Seid auf eine abenteuerliche Anfahrt gefasst — die holprige Schotterpiste gehört zum Erlebnis. Restaurant durchgehend geöffnet von 13 bis 23 Uhr.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/KJumpVrxJTKrM2fR6" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-can-alfredo">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Restaurante C'an Alfredo</h2><div class="detail-price">€€</div>
+          <img class="detail-img" src="img/food/Restaurante C'an Alfredo.jpg" alt="Restaurante C'an Alfredo">
+          <div class="detail-body"><p data-lang="en">One of the oldest restaurants on Ibiza, serving authentic Ibizan and Mediterranean cuisine since 1934. Located on the elegant Passeig de Vara de Rey in Ibiza Town, this family-run institution is famous for its paella and traditional seafood dishes made with the best local produce. A true piece of Ibiza history — the kind of place where generations of islanders have celebrated special occasions. The homemade desserts are also worth saving room for.</p><p data-lang="de">Eines der ältesten Restaurants auf Ibiza, das seit 1934 authentische ibizenkische und mediterrane Küche serviert. Am eleganten Passeig de Vara de Rey in Ibiza-Stadt gelegen, ist dieses familiengeführte Traditionshaus berühmt für seine Paella und traditionelle Meeresfrüchtegerichte aus besten lokalen Produkten. Ein echtes Stück Ibiza-Geschichte — die Art von Ort, an dem Generationen von Inselbewohnern besondere Anlässe gefeiert haben. Für die hausgemachten Desserts lohnt es sich, Platz aufzuheben.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/6zr1vHzJMDSpueiu7" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-la-bodega">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>La Bodega</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/La Bodega.webp" alt="La Bodega">
+          <div class="detail-body"><p data-lang="en">Tucked away at the foot of the Dalt Vila walls, right next to the Portal de Ses Taules, La Bodega has been a favourite of locals and Ibiza regulars since 2005. Opened by Fernando and Miguel, this buzzing tapas spot serves scrumptious small plates — the patatas bravas, croquetas de jamón and chorizo are legendary. Over 60 wines, mostly Spanish, expertly curated. Grab a table on the charming sidewalk terrace and watch the world go by. The perfect start to an evening in Ibiza Town.</p><p data-lang="de">Versteckt am Fuße der Dalt-Vila-Mauern, direkt neben dem Portal de Ses Taules, ist La Bodega seit 2005 ein Liebling der Einheimischen und Ibiza-Stammgäste. Von Fernando und Miguel eröffnet, serviert diese lebhafte Tapas-Bar köstliche kleine Gerichte — die Patatas Bravas, Croquetas de Jamón und Chorizo sind legendär. Über 60 Weine, größtenteils spanisch, sorgfältig ausgewählt. Einen Tisch auf der charmanten Terasse ergattern und das Treiben beobachten. Der perfekte Start für einen Abend in Ibiza-Stadt.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/s589GABiuwahXzV98" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-fish-shack">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Fish Shack</h2><div class="detail-price">€</div>
+          <img class="detail-img" src="img/food/Fish Shack.jpg" alt="Fish Shack">
+          <div class="detail-body"><p data-lang="en">A tiny shack on the rocks at the very end of Talamanca beach — no menu, no phone number, no reservations. The waiter simply tells you the fresh catch of the day, it gets grilled and served with salad and potatoes. That's it. Mains from around €9. Cash only. The views over the bay and towards Ibiza Town are stunning, especially at sunset. Only open in summer and completely dismantled in winter. First come, first served — get there early.</p><p data-lang="de">Eine winzige Hütte auf den Felsen am äußersten Ende des Strandes von Talamanca — keine Speisekarte, keine Telefonnummer, keine Reservierungen. Der Kellner sagt einfach, was heute gefangen wurde, es wird gegrillt und mit Salat und Kartoffeln serviert. Das war's. Hauptgerichte ab ca. 9€. Nur Barzahlung. Der Blick über die Bucht und auf Ibiza-Stadt ist atemberaubend, besonders bei Sonnenuntergang. Nur im Sommer geöffnet und im Winter komplett abgebaut. Wer zuerst kommt, mahlt zuerst — früh da sein.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/Dub3LBdaRZPHFziW9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-bar-anita">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Bar Anita</h2><div class="detail-price">€</div>
+          <img class="detail-img" src="img/food/Bar Anita.jpg" alt="Bar Anita">
+          <div class="detail-body"><p data-lang="en">Known as the "first hippie bar" of Ibiza, Bar Anita (Ca n'Anneta) has been a gathering place in San Carlos since 1960 — right next to the village church. Once the local post office and meeting point during the hippie era, it still radiates that authentic, bohemian spirit. The tapas are excellent: try the fried octopus, montaditos and the homemade Hierbas Ibicencas — a traditional herbal liqueur made by the family for over a century. Rustic furniture, warm atmosphere, a piece of living history.</p><p data-lang="de">Bekannt als die "erste Hippie-Bar" Ibizas, ist Bar Anita (Ca n'Anneta) seit 1960 ein Treffpunkt in San Carlos — direkt neben der Dorfkirche. Einst das lokale Postamt und Treffpunkt während der Hippie-Ära, strahlt sie noch immer diesen authentischen, bohemischen Geist aus. Die Tapas sind hervorragend: probiert den gebratenen Oktopus, die Montaditos und die hausgemachten Hierbas Ibicencas — ein traditioneller Kräuterlikör, den die Familie seit über einem Jahrhundert herstellt. Rustikale Möbel, warme Atmosphäre, ein Stück lebendige Geschichte.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/w9XHm8FPqscxEiSb8" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-aubergine">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Aubergine</h2><div class="detail-price">€€€</div>
+          <img class="detail-img" src="img/food/Aubergine.jpg" alt="Aubergine">
+          <div class="detail-body"><p data-lang="en">Aubergine by Atzaró is a truly magical dining experience. A beautifully restored white finca set in rambling gardens between Santa Gertrudis and San Miguel, with multiple dining terraces, pergolas and lounge areas. The farm-to-table kitchen celebrates nature with organic local produce — fresh seafood, grilled meats, colourful salads, and excellent vegetarian and vegan options. Whether you dine inside under sabina-beamed ceilings or outside under the stars, it feels like a special occasion. An Ibiza must-do. Book ahead.</p><p data-lang="de">Aubergine by Atzaró ist ein wirklich magisches Esserlebnis. Eine wunderschön restaurierte weiße Finca inmitten weitläufiger Gärten zwischen Santa Gertrudis und San Miguel, mit mehreren Essterrassen, Pergolen und Lounge-Bereichen. Die Farm-to-Table-Küche feiert die Natur mit biologischen lokalen Produkten — frische Meeresfrüchte, gegrilltes Fleisch, bunte Salate und ausgezeichnete vegetarische und vegane Optionen. Ob drinnen unter Sabina-Holzbalkendecken oder draußen unter dem Sternenhimmel — es fühlt sich immer wie ein besonderer Anlass an. Ein Ibiza-Muss. Vorher reservieren.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/RMzzTnQvEGtszwz47" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-cami-balafia">
+          <div class="detail-category-label" data-lang="en">Food & Drink</div><div class="detail-category-label" data-lang="de">Essen & Trinken</div>
+          <h2>Cami de Balafia</h2><div class="detail-price">€€</div>
+          <img class="detail-img" src="img/food/Cami de Balafia.jpg" alt="Cami de Balafia">
+          <div class="detail-body"><p data-lang="en">The holy grail of grilled meat in Ibiza. This rustic, family-run restaurant in Sant Llorenç de Balàfia serves charcoal-grilled rabbit, chicken and mixed platters alongside a simple tomato-onion salad and hand-peeled chips (the grandfather does the peeling). Finish with traditional Ibizan desserts and a homemade hierbas liqueur. Cash only, no cards accepted. Always busy in summer, so booking is essential. Closed on Sundays.</p><p data-lang="de">Der heilige Gral des Grillfleischs auf Ibiza. Dieses rustikale, familiengeführte Restaurant in Sant Llorenç de Balàfia serviert über Holzkohle gegrilltes Kaninchen, Hühnchen und gemischte Platten zusammen mit einem einfachen Tomaten-Zwiebel-Salat und handgeschälten Pommes (der Großvater schält sie). Zum Abschluss traditionelle ibizenkische Desserts und einen hausgemachten Hierbas-Likör. Nur Barzahlung, keine Karten. Im Sommer immer voll, daher Reservierung unbedingt nötig. Sonntags geschlossen.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/xH2ioaNXX7XVfKzt5" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <!-- ===== ACTIVITY CARDS ===== -->
+
+        <div class="detail-card" id="d-old-town">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2 data-lang="en">Old Town & Fortress</h2><h2 data-lang="de">Altstadt & Festung</h2>
+          <img class="detail-img" src="img/activities/Ibiza's old town.jpg" alt="Ibiza Old Town">
+          <div class="detail-body"><p data-lang="en">Dalt Vila is Ibiza's fortified old town — a UNESCO World Heritage Site since 1999, with over 2,500 years of history. Walk through the Portal de Ses Taules, wind your way up through a labyrinth of narrow cobblestone streets, past the Cathedral of Santa María de las Nieves, the Almudaina Castle and charming little squares with breathtaking panoramic views of the harbour and the sea. The Renaissance-era defensive walls stand 25 metres high and up to 5 metres thick — the best preserved coastal fortress in the entire Mediterranean. Magical at any time of day, but especially stunning at sunset. A must-see.</p><p data-lang="de">Dalt Vila ist Ibizas befestigte Altstadt — seit 1999 UNESCO-Weltkulturerbe, mit über 2.500 Jahren Geschichte. Durch das Portal de Ses Taules eintreten und sich durch ein Labyrinth enger Kopfsteinpflastergassen nach oben schlängeln, vorbei an der Kathedrale Santa María de las Nieves, der Burg Almudaina und charmanten kleinen Plätzen mit atemberaubendem Panoramablick auf Hafen und Meer. Die Renaissance-Festungsmauern sind 25 Meter hoch und bis zu 5 Meter dick — die besterhaltene Küstenfestung im gesamten Mittelmeerraum. Magisch zu jeder Tageszeit, besonders atemberaubend bei Sonnenuntergang. Ein absolutes Muss.</p></div>
+          <a class="detail-map-link" href="https://www.google.com/maps/search/?api=1&query=Dalt+Vila+Ibiza" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-can-jordi">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2>Can Jordi — Live Music</h2>
+          <img class="detail-img" src="img/activities/Can Jordi — Live Music.jpg" alt="Can Jordi Blues Station">
+          <div class="detail-body"><p data-lang="en">Known in music circles as "Can Jordi Blues Station", this century-old former grocery store on the road between Ibiza Town and Sant Josep has become one of the most genuine spots on the island. Part bar, part art gallery, part live music stage — with jam sessions featuring well-known and even world-famous musicians performing right by the pavement. Live music on Friday evenings and Saturday afternoons. Grab a drink, sit outside, and let the music carry you away. The kind of place you won't find in any guidebook.</p><p data-lang="de">In Musikerkreisen als "Can Jordi Blues Station" bekannt, hat sich dieser hundertjährige ehemalige Dorfladen an der Straße zwischen Ibiza-Stadt und Sant Josep zu einem der authentischsten Orte der Insel entwickelt. Teils Bar, teils Kunstgalerie, teils Live-Musik-Bühne — mit Jam Sessions, bei denen bekannte und sogar weltberühmte Musiker direkt am Straßenrand spielen. Live-Musik Freitag abends und Samstag nachmittags. Ein Getränk schnappen, draußen sitzen und sich von der Musik mitreißen lassen. Die Art von Ort, die in keinem Reiseführer steht.</p></div>
+          <a class="detail-map-link" href="https://maps.app.goo.gl/ZssFExSJxfwcJRW4A" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-lang="en">View on Google Maps</span><span data-lang="de">Auf Google Maps ansehen</span></a>
+        </div>
+
+        <div class="detail-card" id="d-nightlife">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2>Nightlife</h2>
+          <img class="detail-img" src="img/activities/Nightlife.jpg" alt="Ibiza nightlife">
+          <div class="detail-body">
+            <p data-lang="en">Ibiza is the clubbing capital of the world — and even if you're not a club person, experiencing at least one night out here is something special. The season runs from late April to mid-October, with the biggest names in electronic music taking up residencies. A realistic budget per night is around €185–225 including entry, drinks and transport. Our recommendations:</p>
+            <p data-lang="de">Ibiza ist die Clubbing-Hauptstadt der Welt — und selbst wenn man kein Club-Typ ist, ist mindestens eine Nacht hier etwas Besonderes. Die Saison läuft von Ende April bis Mitte Oktober, mit den größten Namen der elektronischen Musik als Residents. Ein realistisches Budget pro Nacht liegt bei ca. 185–225€ inkl. Eintritt, Getränke und Transport. Unsere Empfehlungen:</p>
+            <ul class="spot-list">
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/RzGmYf2KwujUg2R57" target="_blank" rel="noopener">Pacha</a></span> — <span data-lang="en">the icon, open since 1973</span><span data-lang="de">die Ikone, offen seit 1973</span></li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/zYGzaARfjb1me8W59" target="_blank" rel="noopener">Hï</a></span> — <span data-lang="en">world-class sound & light</span><span data-lang="de">Sound & Licht der Weltklasse</span></li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/Xy6iyxBipKAnaut6A" target="_blank" rel="noopener">DC10</a></span> — <span data-lang="en">underground techno, especially Mondays!</span><span data-lang="de">Underground-Techno, insbesondere Montags!</span></li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/1kzQxrufXLAuvWZs7" target="_blank" rel="noopener">Ushuaia</a></span> — <span data-lang="en">iconic open-air day party</span><span data-lang="de">ikonische Open-Air Day-Party</span></li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/3xQhvzfGbFmKqVDr5" target="_blank" rel="noopener">UNVRS</a></span> — <span data-lang="en">the new superclub (formerly Privilege)</span><span data-lang="de">der neue Superclub (ehem. Privilege)</span></li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/EEAUKkvZnfxvXgQX6" target="_blank" rel="noopener">Cova Santa</a></span> — Day Party</li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/GxA31aEynvf7JdpN7" target="_blank" rel="noopener">Destino</a></span> — Day Party</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="detail-card" id="d-sunset">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2 data-lang="en">Sunset Spots</h2><h2 data-lang="de">Sonnenuntergang</h2>
+          <img class="detail-img" src="img/activities/Sunset Spots.webp" alt="Ibiza sunset">
+          <div class="detail-body">
+            <p data-lang="en">Watching the sunset is a daily ritual on Ibiza. Pack some drinks, snacks and a blanket, find a spot on the south-west coast and let the magic happen. The entire western shoreline is spectacular, but these are our favourites:</p>
+            <p data-lang="de">Den Sonnenuntergang zu schauen ist ein tägliches Ritual auf Ibiza. Getränke, Snacks und eine Decke einpacken, einen Platz an der Südwestküste finden und den Zauber genießen. Die gesamte Westküste ist spektakulär, aber das sind unsere Favoriten:</p>
+            <ul class="spot-list">
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/W1UAn3dKGoEUofWZ7" target="_blank" rel="noopener">Punta Galera</a></span> — <span data-lang="en">flat rock terraces, swimming & cliff jumping</span><span data-lang="de">flache Felsplattformen, Schwimmen & Klippenspringen</span></li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/hxVyoLRtZtcXWg647" target="_blank" rel="noopener">Time and Space</a></span> — <span data-lang="en">art installation with stunning views</span><span data-lang="de">Kunstinstallation mit atemberaubendem Blick</span></li>
+              <li><span class="spot-name"><a href="https://maps.app.goo.gl/1PDEfZqMJmcpcAff8" target="_blank" rel="noopener">Torre des Savinar</a></span> — <span data-lang="en">ancient watchtower overlooking Es Vedrà</span><span data-lang="de">alter Wachturm mit Blick auf Es Vedrà</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="detail-card" id="d-aquarium">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2>Aquarium Cap Blanc</h2>
+          <img class="detail-img" src="img/activities/Aquarium Cap Blanc.jpg" alt="Aquarium Cap Blanc">
+          <div class="detail-body"><p data-lang="en">A unique natural cave near Cala Gració — formerly a lobster hatchery, now converted into an atmospheric aquarium showcasing Mediterranean marine life. The 400 sqm cave has sea water constantly circulating, creating perfect conditions for the fish. But the real highlight: on summer evenings they serve "sardinadas" — spit-roasted sardines with country salad, right by the sea. Two shifts at 8:30pm and 10:30pm. Also a great spot to watch the sunset. Small, charming and completely different from anything else on the island.</p><p data-lang="de">Eine einzigartige Naturhöhle nahe Cala Gració — früher eine Hummerzucht, heute ein stimmungsvolles Aquarium mit mediterranem Meeresleben. In der 400 qm großen Höhle zirkuliert ständig Meerwasser und schafft perfekte Bedingungen für die Fische. Aber das eigentliche Highlight: An Sommerabenden gibt es "Sardinadas" — am Spieß gegrillte Sardinen mit Bauernsalat direkt am Meer. Zwei Schichten um 20:30 und 22:30 Uhr. Auch ein toller Ort für den Sonnenuntergang. Klein, charmant und komplett anders als alles andere auf der Insel.</p></div>
+          <a class="detail-map-link" href="https://aquariumcapblanc.com/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Website</a>
+        </div>
+
+        <div class="detail-card" id="d-hippy-market">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2>Hippy Market Las Dalias</h2>
+          <img class="detail-img" src="img/activities/Hippy Market Las Dalias.jpg" alt="Hippy Market Las Dalias">
+          <div class="detail-body"><p data-lang="en">Born on Valentine's Day 1985, Las Dalias in Sant Carles is a colourful oasis of over 200 stalls selling handmade jewellery, Ibizan fashion, artisanal crafts, local salt, aloe vera products and hierbas ibicencas. Open Saturdays from February to November (from 10am), and Sundays in spring and autumn (from 11am). In summer, the night market runs on Sunday, Monday and Tuesday evenings — a more relaxed version with live music and a magical atmosphere. Can get very busy in August (up to 20,000 visitors on Saturdays!), so come early for the best experience.</p><p data-lang="de">Am Valentinstag 1985 geboren, ist Las Dalias in Sant Carles eine farbenfrohe Oase mit über 200 Ständen — handgemachter Schmuck, ibizenkische Mode, Kunsthandwerk, lokales Salz, Aloe-Vera-Produkte und Hierbas Ibicencas. Geöffnet samstags von Februar bis November (ab 10 Uhr) und sonntags im Frühling und Herbst (ab 11 Uhr). Im Sommer gibt es den Nachtmarkt sonntags, montags und dienstags abends — eine entspanntere Version mit Live-Musik und magischer Atmosphäre. Im August kann es sehr voll werden (bis zu 20.000 Besucher samstags!), also früh kommen für das beste Erlebnis.</p></div>
+          <a class="detail-map-link" href="https://lasdalias.es/en/index" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Website</a>
+        </div>
+
+        <div class="detail-card" id="d-formentera">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2>Formentera</h2>
+          <img class="detail-img" src="img/activities/Formentera.jpg" alt="Formentera">
+          <div class="detail-body"><p data-lang="en">Ibiza's little sister island is just a 30-minute ferry ride away and absolutely worth a day trip. The beaches — especially Platja de Ses Illetes — are Caribbean-level pristine with powdery white sand and impossibly clear water. The best way to explore is by scooter: pick one up right at the La Savina ferry terminal (packages including ferry + scooter start around €29). Take an early ferry out and a late one back to make the most of it. The island is small enough to cover in a day — ride from beach to beach, stop for lunch, and soak it all in.</p><p data-lang="de">Ibizas kleine Schwesterinsel ist nur 30 Minuten mit der Fähre entfernt und absolut einen Tagesausflug wert. Die Strände — besonders Platja de Ses Illetes — sind karibisch anmutend mit pudrigem weißem Sand und unglaublich klarem Wasser. Am besten mit dem Roller erkunden: direkt am Fährterminal La Savina abholen (Pakete inkl. Fähre + Roller ab ca. 29€). Frühe Fähre hin und späte zurück nehmen, um das Maximum rauszuholen. Die Insel ist klein genug für einen Tag — von Strand zu Strand fahren, Mittagspause einlegen und alles aufsaugen.</p></div>
+        </div>
+
+        <div class="detail-card" id="d-north">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2 data-lang="en">Northern Villages</h2><h2 data-lang="de">Dörfer im Norden</h2>
+          <img class="detail-img" src="img/activities/Northern Villages.jpg" alt="Northern Villages Ibiza">
+          <div class="detail-body"><p data-lang="en">The north of Ibiza is a world away from the clubs and beach bars. These charming villages offer the quieter, more authentic side of the island. Santa Gertrudis sits at the geographical heart of Ibiza — a beautiful square with a whitewashed fortress church, surrounded by great restaurants, galleries and boutiques. Friday evenings bring a small artisanal market with live music. Sant Miquel, 18km north, has a 13th-century parish church and traditional folk dancing in summer. Sant Joan is the most bohemian of the three — its Sunday market with organic produce, artisanal goods and live music is a local favourite. All three are perfect for a relaxed morning or afternoon drive.</p><p data-lang="de">Der Norden Ibizas ist eine andere Welt als die Clubs und Strandbars. Diese charmanten Dörfer zeigen die ruhigere, authentischere Seite der Insel. Santa Gertrudis liegt im geographischen Herzen Ibizas — ein wunderschöner Platz mit weißer Festungskirche, umgeben von tollen Restaurants, Galerien und Boutiquen. Freitagabends gibt es einen kleinen Kunsthandwerksmarkt mit Live-Musik. Sant Miquel, 18km nördlich, hat eine Pfarrkirche aus dem 13. Jahrhundert und traditionelle Folkloretänze im Sommer. Sant Joan ist das bohemischste der drei — der Sonntagsmarkt mit Bio-Produkten, Kunsthandwerk und Live-Musik ist ein Favorit der Einheimischen. Alle drei sind perfekt für eine entspannte Morgen- oder Nachmittagsfahrt.</p></div>
+        </div>
+
+        <div class="detail-card" id="d-spa">
+          <div class="detail-category-label" data-lang="en">Activities</div><div class="detail-category-label" data-lang="de">Aktivitäten</div>
+          <h2>Spa Day</h2>
+          <img class="detail-img" src="img/activities/Spa Day.webp" alt="Spa Day Ibiza">
+          <div class="detail-body">
+            <p data-lang="en">After all that exploring, treat yourself to a spa day! Both options offer day packages for non-hotel guests, including pool access, treatments and lunch. Book well in advance — these fill up fast:</p>
+            <p data-lang="de">Nach all dem Entdecken, gönne dir einen Spa-Tag! Beide Optionen bieten Tagespakete für Nicht-Hotelgäste an, inklusive Poolzugang, Behandlungen und Mittagessen. Frühzeitig buchen — die sind schnell ausgebucht:</p>
+            <ul class="spot-list">
+              <li><span class="spot-name"><a href="https://atzaro.com/spa-ibiza/day-experiences/" target="_blank" rel="noopener">Agroturismo Atzaro</a></span> — <span data-lang="en">43m pool, hammam, sauna, yoga, organic treatments</span><span data-lang="de">43m Pool, Hammam, Sauna, Yoga, Bio-Behandlungen</span></li>
+              <li><span class="spot-name"><a href="https://www.haciendanaxamena-ibiza.com/en/wellness/" target="_blank" rel="noopener">Hacienda Na Xamena</a></span> — <span data-lang="en">clifftop spa with hydrotherapy & stunning views</span><span data-lang="de">Klippenrand-Spa mit Hydrotherapie & atemberaubendem Blick</span></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Footer -->
+  <div class="sticky-footer">
+    <span class="footer-date" data-lang="en">September 13th, 2026</span>
+    <span class="footer-date" data-lang="de">13. September 2026</span>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ===== Accordion ===== */
+      document.querySelectorAll('.cat-group-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.parentElement.classList.toggle('open');
+        });
+      });
+
+      /* ===== Detail view ===== */
+      const items = document.querySelectorAll('.cat-item');
+      const placeholder = document.getElementById('detailPlaceholder');
+      const cards = document.querySelectorAll('.detail-card');
+
+      function showDetail(detailId) {
+        const card = document.getElementById(detailId);
+        if (!card) return;
+        items.forEach(i => {
+          i.classList.toggle('active', i.dataset.detail === detailId);
+        });
+        placeholder.style.display = 'none';
+        document.getElementById('mapNavItem').classList.remove('active');
+        cards.forEach(c => c.classList.remove('visible'));
+        card.classList.add('visible');
+        // open the parent category group
+        const catItem = document.querySelector(`.cat-item[data-detail="${detailId}"]`);
+        if (catItem) {
+          const group = catItem.closest('.cat-group');
+          if (group && !group.classList.contains('open')) group.classList.add('open');
+        }
+        if (window.innerWidth <= 768) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          mapNav.classList.remove('active');
+          showDetail(item.dataset.detail);
+        });
+      });
+
+      /* ===== Map nav item ===== */
+      const mapNav = document.getElementById('mapNavItem');
+      mapNav.classList.add('active'); // active on load
+      mapNav.addEventListener('click', () => {
+        // hide all detail cards, show map placeholder
+        cards.forEach(c => c.classList.remove('visible'));
+        items.forEach(i => i.classList.remove('active'));
+        placeholder.style.display = '';
+        mapNav.classList.add('active');
+        // fix map size after re-showing
+        setTimeout(() => map.invalidateSize(), 100);
+      });
+
+      /* ===== Leaflet Map ===== */
+      const map = L.map('mapContainer', {
+        center: [38.96, 1.41],
+        zoom: 11,
+        zoomControl: true,
+        attributionControl: false
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 17
+      }).addTo(map);
+
+      // Custom circle markers by category colour
+      function pin(lat, lng, color, label, detailId) {
+        const m = L.circleMarker([lat, lng], {
+          radius: 7, fillColor: color, color: '#fff',
+          weight: 2, opacity: 1, fillOpacity: 0.9
+        }).addTo(map);
+        m.bindTooltip(label, { direction: 'top', offset: [0, -8], className: 'map-tip' });
+        if (detailId) {
+          m.on('click', () => showDetail(detailId));
+          m.setStyle({ cursor: 'pointer' });
+        }
+        return m;
+      }
+
+      const B = '#a5c4d4'; // beach
+      const F = '#c4a5d4'; // food
+      const A = '#a5d4b4'; // activity
+
+      /* — Beaches — */
+      pin(38.8697, 1.2282, B, "Cala d'Hort",       'd-cala-dhort');
+      pin(38.9605, 1.2110, B, 'Platges de Comte',   'd-platges-comte');
+      pin(38.9810, 1.2250, B, 'Cala Salada',        'd-cala-salada');
+      pin(38.9620, 1.2370, B, 'Cala Bassa',         'd-cala-bassa');
+      pin(38.8350, 1.3750, B, 'Ses Salinas',        'd-ses-salinas');
+      pin(38.9340, 1.2140, B, 'Cala Tarida',        'd-cala-tarida');
+      pin(38.8670, 1.3150, B, 'Cala Jondal',        'd-cala-jondal');
+      pin(39.0020, 1.5720, B, 'Cala Nova',          'd-cala-nova');
+      pin(39.0680, 1.4200, B, 'Benirràs',           'd-benirras');
+
+      /* — Food & Drink — */
+      pin(38.9210, 1.2950, F, "S'Espartar",          'd-sespartar');
+      pin(38.8780, 1.2820, F, 'Bargrill Llumbi',     'd-llumbi');
+      pin(38.8685, 1.3180, F, 'Tropicana',           'd-tropicana');
+      pin(38.8760, 1.2750, F, 'Ses Boques',          'd-ses-boques');
+      pin(38.8520, 1.3410, F, 'Sa Caleta',           'd-sa-caleta');
+      pin(38.8640, 1.2340, F, 'Es Boldado',          'd-es-boldado');
+      pin(38.9590, 1.2080, F, 'Ses Roques',          'd-ses-roques');
+      pin(38.9575, 1.2150, F, 'Cala Escondida',      'd-cala-escondida');
+      pin(38.9740, 1.2580, F, 'Hostal La Torre',     'd-hostal-la-torre');
+      pin(38.9810, 1.3020, F, "Rita's Cantina",      'd-ritas-cantina');
+      pin(38.9800, 1.3060, F, 'Es Nautic',           'd-es-nautic');
+      pin(38.9270, 1.3070, F, 'Bar Can Berri',       'd-can-berri');
+      pin(38.8870, 1.3690, F, 'Bar Can Bellotera',   'd-can-bellotera');
+      pin(38.8410, 1.3650, F, 'Experimental Beach',  'd-experimental');
+      pin(38.9070, 1.4340, F, "C'an Alfredo",        'd-can-alfredo');
+      pin(38.9060, 1.4320, F, 'La Bodega',           'd-la-bodega');
+      pin(38.9150, 1.4520, F, 'Fish Shack',          'd-fish-shack');
+      pin(39.0300, 1.5330, F, 'Bar Anita',           'd-bar-anita');
+      pin(39.0400, 1.4700, F, 'Aubergine',           'd-aubergine');
+      pin(39.0480, 1.4810, F, 'Cami de Balafia',     'd-cami-balafia');
+
+      /* — Activities — */
+      pin(38.9067, 1.4358, A, 'Dalt Vila',           'd-old-town');
+      pin(38.9100, 1.3280, A, 'Can Jordi',           'd-can-jordi');
+      pin(38.8870, 1.4100, A, 'Nightlife (Pacha)',   'd-nightlife');
+      pin(38.9780, 1.2340, A, 'Punta Galera',        'd-sunset');
+      pin(38.9680, 1.2720, A, 'Aquarium Cap Blanc',  'd-aquarium');
+      pin(39.0300, 1.5300, A, 'Las Dalias',          'd-hippy-market');
+      pin(38.9450, 1.4500, A, 'Spa (Atzaró)',        'd-spa');
+
+      // Fix map size on first render (container may be hidden initially)
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+  </script>
+  <style>
+    .map-tip {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .leaflet-container { cursor: default; }
+    .leaflet-interactive { cursor: pointer !important; }
+  </style>
+</body>
+</html>

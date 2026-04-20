@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" fill="none" stroke="#2c2c2c" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Main stem -->
+  <path d="M50,60 Q120,55 200,58 Q280,61 350,50" />
+
+  <!-- Left leaves -->
+  <path d="M80,58 Q65,35 90,30 Q105,42 80,58" />
+  <path d="M85,60 Q70,80 95,85 Q108,72 85,60" />
+
+  <!-- Center-left leaves -->
+  <path d="M130,56 Q115,33 140,28 Q155,40 130,56" />
+  <path d="M135,58 Q120,78 145,83 Q158,70 135,58" />
+
+  <!-- Olives -->
+  <ellipse cx="165" cy="48" rx="7" ry="9" />
+  <ellipse cx="170" cy="52" rx="6" ry="8" />
+
+  <!-- Center-right leaves -->
+  <path d="M200,57 Q185,34 210,29 Q225,41 200,57" />
+  <path d="M205,59 Q190,79 215,84 Q228,71 205,59" />
+
+  <!-- Right leaves -->
+  <path d="M260,55 Q245,32 270,27 Q285,39 260,55" />
+  <path d="M265,57 Q250,77 275,82 Q288,69 265,57" />
+
+  <!-- Far right leaves -->
+  <path d="M310,52 Q300,32 320,28 Q335,38 310,52" />
+  <path d="M320,54 Q310,70 330,73 Q340,63 320,54" />
+
+  <!-- Small stem details -->
+  <path d="M90,30 Q95,25 100,28" />
+  <path d="M140,28 Q145,22 150,26" />
+  <path d="M210,29 Q215,23 220,27" />
+  <path d="M270,27 Q275,21 280,25" />
+</svg>

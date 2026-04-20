@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda – Sabrina & Gilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== AGENDA LAYOUT OVERRIDE ===== */
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Left side: Calendar instead of photo */
+    .calendar-side {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 25%;
+      height: 100vh;
+      background: var(--accent);
+      color: #fff;
+      overflow-y: auto;
+      z-index: 1;
+      padding: 5.5rem 1.4rem 2rem;
+    }
+
+    .calendar-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .calendar-header h1 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .calendar-header p {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      opacity: 0.6;
+      letter-spacing: 0.05em;
+    }
+
+    /* Day columns */
+    .calendar-days {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .calendar-day {
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding: 1.2rem 0;
+    }
+
+    .calendar-day:last-child {
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .day-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .day-number {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 300;
+      line-height: 1;
+      opacity: 0.4;
+    }
+
+    .day-label {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .day-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 50px;
+      margin-left: auto;
+      opacity: 0.6;
+    }
+
+    .day-tag.highlight {
+      border-color: #d4a574;
+      color: #d4a574;
+      opacity: 1;
+    }
+
+    /* Event items in calendar */
+    .cal-events {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .cal-event {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .cal-event:hover,
+    .cal-event.active {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .cal-event.active {
+      background: rgba(255,255,255,0.15);
+    }
+
+    .cal-event .event-time {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      opacity: 0.5;
+      min-width: 50px;
+      flex-shrink: 0;
+    }
+
+    .cal-event .event-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      flex-shrink: 0;
+    }
+
+    .cal-event .event-dot.ceremony { background: #d4a574; }
+    .cal-event .event-dot.party { background: #a5c4d4; }
+    .cal-event .event-dot.food { background: #c4a5d4; }
+    .cal-event .event-dot.activity { background: #a5d4b4; }
+    .cal-event .event-dot.travel { background: #d4d4a5; }
+
+    .cal-event .event-label {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      letter-spacing: 0.01em;
+    }
+
+    /* Right side: Detail view */
+    .content-side {
+      margin-left: 25%;
+      width: 75%;
+    }
+
+    .detail-view {
+      padding: 0;
+      max-width: none;
+      margin: 0;
+    }
+
+    .detail-view .detail-card {
+      padding: 4rem 3rem;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .detail-placeholder {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      height: 100vh;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .detail-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Detail card */
+    .detail-card {
+      display: none;
+    }
+
+    .detail-card.visible {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-card .detail-day-label {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 0.3rem;
+    }
+
+    .detail-card h2 {
+      font-family: var(--font-heading);
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 0.4rem;
+    }
+
+    .detail-card .detail-time {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-card .detail-body {
+      font-size: 0.95rem;
+      color: var(--text-medium);
+      line-height: 1.8;
+    }
+
+    .detail-card .detail-body p {
+      margin-bottom: 1rem;
+    }
+
+    .detail-card .detail-location {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .detail-card .detail-location svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .detail-card .detail-dresscode {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--accent);
+      border-radius: 50px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    /* Sticky footer adjustment */
+    .sticky-footer {
+      left: 25%;
+      width: 75%;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .calendar-side {
+        width: 30%;
+        padding: 3.5rem 1.2rem 2rem;
+      }
+      .content-side {
+        margin-left: 30%;
+        width: 70%;
+      }
+      .sticky-footer {
+        left: 30%;
+        width: 70%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-wrapper {
+        flex-direction: column;
+      }
+      .calendar-side {
+        position: relative;
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        padding: 5rem 1.5rem 2rem;
+      }
+      .content-side {
+        margin-left: 0;
+        width: 100%;
+      }
+      .detail-view {
+        padding: 2rem 1.5rem;
+      }
+      .sticky-footer {
+        left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Toggle -->
+  <button class="nav-toggle" aria-label="Menu">
+    <div class="hamburger"><span></span><span></span><span></span></div>
+    MENU
+  </button>
+
+  <!-- Language Switcher -->
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="de">DE</button>
+  </div>
+
+  <!-- Navigation Drawer -->
+  <div class="nav-drawer-overlay"></div>
+  <nav class="nav-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">Sabrina & Gilles</span>
+      <button class="nav-close" aria-label="Close">&times;</button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="agenda.html" class="active">Agenda</a></li>
+      <li><a href="discover.html">Discover Ibiza</a></li>
+      <li><a href="qa.html">Q & A</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Layout -->
+  <div class="page-wrapper">
+
+    <!-- Left: Calendar -->
+    <div class="calendar-side">
+      <div class="calendar-header">
+        <h1>Agenda</h1>
+        <p data-lang="en">September 12 – 13, 2026</p>
+        <p data-lang="de">12. – 13. September 2026</p>
+      </div>
+
+      <div class="calendar-days">
+
+        <!-- SATURDAY -->
+        <div class="calendar-day">
+          <div class="day-header">
+            <span class="day-number">12</span>
+            <span class="day-label" data-lang="en">Saturday</span>
+            <span class="day-label" data-lang="de">Samstag</span>
+            <span class="day-tag" data-lang="en">Polterabend</span>
+            <span class="day-tag" data-lang="de">Polterabend</span>
+          </div>
+          <div class="cal-events">
+            <div class="cal-event" data-detail="sat-polterabend">
+              <span class="event-time">19:00</span>
+              <span class="event-dot party"></span>
+              <span class="event-label">Polterabend</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUNDAY — WEDDING DAY -->
+        <div class="calendar-day">
+          <div class="day-header">
+            <span class="day-number">13</span>
+            <span class="day-label" data-lang="en">Sunday</span>
+            <span class="day-label" data-lang="de">Sonntag</span>
+            <span class="day-tag highlight" data-lang="en">Wedding Day</span>
+            <span class="day-tag highlight" data-lang="de">Hochzeitstag</span>
+          </div>
+          <div class="cal-events">
+            <div class="cal-event" data-detail="sun-welcome">
+              <span class="event-time">14:30</span>
+              <span class="event-dot ceremony"></span>
+              <span class="event-label" data-lang="en">Guest Reception</span>
+              <span class="event-label" data-lang="de">Gästeempfang</span>
+            </div>
+            <div class="cal-event" data-detail="sun-ceremony">
+              <span class="event-time">15:00</span>
+              <span class="event-dot ceremony"></span>
+              <span class="event-label" data-lang="en">Ceremony</span>
+              <span class="event-label" data-lang="de">Zeremonie</span>
+            </div>
+            <div class="cal-event" data-detail="sun-reception">
+              <span class="event-time">15:30</span>
+              <span class="event-dot ceremony"></span>
+              <span class="event-label">Reception</span>
+            </div>
+            <div class="cal-event" data-detail="sun-dinner">
+              <span class="event-time">17:30</span>
+              <span class="event-dot food"></span>
+              <span class="event-label">Dinner</span>
+            </div>
+            <div class="cal-event" data-detail="sun-party">
+              <span class="event-time">20:00</span>
+              <span class="event-dot party"></span>
+              <span class="event-label">Party</span>
+            </div>
+            <div class="cal-event" data-detail="sun-afterparty">
+              <span class="event-time">00:00</span>
+              <span class="event-dot party"></span>
+              <span class="event-label">Afterparty</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- GOOD TO KNOW -->
+      <div class="calendar-day" style="margin-top:0.5rem; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 1rem;">
+        <div class="cal-event" data-detail="info-general">
+          <span class="event-dot" style="background:rgba(255,255,255,0.5);"></span>
+          <span class="event-label" data-lang="en">Good to Know</span>
+          <span class="event-label" data-lang="de">Gut zu wissen</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Detail view -->
+    <div class="content-side">
+      <div class="detail-view">
+
+        <!-- Placeholder when nothing is selected -->
+        <div class="detail-placeholder" id="detailPlaceholder">
+          <img src="img/agenda.jpeg" alt="Païssa d'en Bernat, Ibiza">
+        </div>
+
+        <!-- ===== DETAIL CARDS ===== -->
+
+        <!-- Saturday: Polterabend -->
+        <div class="detail-card" id="sat-polterabend">
+          <div class="detail-day-label" data-lang="en">Saturday, September 12</div>
+          <div class="detail-day-label" data-lang="de">Samstag, 12. September</div>
+          <h2>Polterabend</h2>
+          <div class="detail-time">19:00</div>
+          <div class="detail-body">
+            <p data-lang="en">Join us the evening before the wedding for a traditional Polterabend — a fun, relaxed get-together to kick off the celebrations. Details to follow.</p>
+            <p data-lang="de">Feiert mit uns am Vorabend der Hochzeit einen traditionellen Polterabend — ein entspanntes Beisammensein zum Auftakt der Feierlichkeiten. Details folgen.</p>
+          </div>
+          <div class="detail-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span data-lang="en">Location TBD</span>
+            <span data-lang="de">Ort wird noch bekannt gegeben</span>
+          </div>
+        </div>
+
+        <!-- Sunday: Guest Reception -->
+        <div class="detail-card" id="sun-welcome">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2 data-lang="en">Guest Reception</h2>
+          <h2 data-lang="de">Gästeempfang</h2>
+          <div class="detail-time">14:30</div>
+          <div class="detail-body">
+            <p data-lang="en">Please arrive by 14:30 so we can welcome you before the ceremony begins. Enjoy a welcome drink while you find your seat.</p>
+            <p data-lang="de">Bitte seid bis 14:30 Uhr da, damit wir euch vor Beginn der Zeremonie begrüßen können. Genießt einen Willkommensdrink, während ihr euren Platz findet.</p>
+          </div>
+          <div class="detail-dresscode" data-lang="en">Dress code: Cocktail</div>
+          <div class="detail-dresscode" data-lang="de">Dresscode: Cocktail</div>
+          <div class="detail-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span>Sant Josep de sa Talaia, Ibiza</span>
+          </div>
+        </div>
+
+        <!-- Sunday: Ceremony -->
+        <div class="detail-card" id="sun-ceremony">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2 data-lang="en">Ceremony</h2>
+          <h2 data-lang="de">Zeremonie</h2>
+          <div class="detail-time">15:00</div>
+          <div class="detail-body">
+            <p data-lang="en">Our wedding ceremony will take place outdoors. We kindly ask you not to take photos during the ceremony — our professional photographer will capture every moment.</p>
+            <p data-lang="de">Unsere Trauung findet draußen statt. Wir bitten euch, während der Zeremonie keine Fotos zu machen — unser professioneller Fotograf wird jeden Moment festhalten.</p>
+          </div>
+          <div class="detail-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span>Sant Josep de sa Talaia, Ibiza</span>
+          </div>
+        </div>
+
+        <!-- Sunday: Reception -->
+        <div class="detail-card" id="sun-reception">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2>Reception</h2>
+          <div class="detail-time">15:30 – 17:30</div>
+          <div class="detail-body">
+            <p data-lang="en">After the ceremony, enjoy drinks and canapés while the newlyweds take their photos. Time to mingle, relax and celebrate!</p>
+            <p data-lang="de">Nach der Zeremonie genießt Drinks und Häppchen, während das Brautpaar seine Fotos macht. Zeit zum Plaudern, Entspannen und Feiern!</p>
+          </div>
+        </div>
+
+        <!-- Sunday: Dinner -->
+        <div class="detail-card" id="sun-dinner">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2>Dinner</h2>
+          <div class="detail-time">17:30 – 20:00</div>
+          <div class="detail-body">
+            <p data-lang="en">Sit-down dinner to celebrate with our closest family and friends.</p>
+            <p data-lang="de">Festliches Abendessen mit unserer engsten Familie und unseren Freunden.</p>
+
+            <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(107,112,92,0.15);">
+              <p style="font-family:var(--font-body);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-medium);margin-bottom:1rem;" data-lang="en">Dinner Preferences</p>
+              <p style="font-family:var(--font-body);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-medium);margin-bottom:1rem;" data-lang="de">Essenswünsche</p>
+
+              <form id="dinnerForm">
+                <div style="display:flex;gap:1rem;margin-bottom:1rem;">
+                  <div style="flex:1;">
+                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">First Name</label>
+                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Vorname</label>
+                    <input type="text" name="firstName" required style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;">
+                  </div>
+                  <div style="flex:1;">
+                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">Last Name</label>
+                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Nachname</label>
+                    <input type="text" name="lastName" required style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;">
+                  </div>
+                </div>
+                <div style="margin-bottom:1rem;">
+                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">Meal Preference</label>
+                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Essenswahl</label>
+                  <select name="meal" required style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;appearance:none;-webkit-appearance:none;background:#fff url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27%3E%3Cpath d=%27M1 1l5 5 5-5%27 stroke=%27%236b705c%27 stroke-width=%271.5%27 fill=%27none%27/%3E%3C/svg%3E') no-repeat right 0.9rem center;padding-right:2.5rem;cursor:pointer;">
+                    <option value="" disabled selected data-lang="en">Please select...</option>
+                    <option value="" disabled selected data-lang="de">Bitte auswählen...</option>
+                    <option value="Beef" data-lang="en">Beef</option>
+                    <option value="Beef" data-lang="de">Rind</option>
+                    <option value="Fisch / Fish" data-lang="en">Fish</option>
+                    <option value="Fisch / Fish" data-lang="de">Fisch</option>
+                  </select>
+                </div>
+                <div style="margin-bottom:1rem;">
+                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">Allergies / Dietary Requirements</label>
+                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Allergien / Besondere Ernährung</label>
+                  <textarea name="allergies" style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;resize:vertical;min-height:60px;"></textarea>
+                </div>
+                <button type="submit" style="padding:0.6rem 2rem;font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#fff;background:var(--accent);border:none;border-radius:4px;cursor:pointer;" data-lang="en">Submit</button>
+                <button type="submit" style="padding:0.6rem 2rem;font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#fff;background:var(--accent);border:none;border-radius:4px;cursor:pointer;" data-lang="de">Absenden</button>
+              </form>
+              <div id="dinnerSuccess" style="display:none;text-align:center;padding:1.5rem 0;">
+                <div style="font-size:1.5rem;margin-bottom:0.5rem;">✓</div>
+                <p style="font-family:var(--font-heading);font-size:1.1rem;color:var(--text-dark);" data-lang="en">Thank you!</p>
+                <p style="font-family:var(--font-heading);font-size:1.1rem;color:var(--text-dark);" data-lang="de">Vielen Dank!</p>
+                <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.3rem;" data-lang="en">Your preferences have been saved.</p>
+                <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.3rem;" data-lang="de">Deine Essenswünsche wurden gespeichert.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sunday: Party -->
+        <div class="detail-card" id="sun-party">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2>Party</h2>
+          <div class="detail-time">20:00 – 00:00</div>
+          <div class="detail-body">
+            <p data-lang="en">Time to dance! Due to noise restrictions, the venue party ends at midnight.</p>
+            <p data-lang="de">Zeit zum Tanzen! Aufgrund der Lärmschutzvorschriften endet die Party am Veranstaltungsort um Mitternacht.</p>
+          </div>
+        </div>
+
+        <!-- Sunday: Afterparty -->
+        <div class="detail-card" id="sun-afterparty">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2>Afterparty</h2>
+          <div class="detail-time" data-lang="en">00:00 – open end</div>
+          <div class="detail-time" data-lang="de">00:00 – open end</div>
+          <div class="detail-body">
+            <p data-lang="en">The night is young — and we have a big surprise planned for everyone who wants to keep celebrating with us! We'll continue the party at a very special location. Since this is Ibiza, the night doesn't have to end :) <strong>Important:</strong> Please let us know in advance if you'd like to join the afterparty, as we need to plan ahead for this one.</p>
+            <p data-lang="de">Die Nacht ist noch jung — und wir haben eine große Überraschung für alle geplant, die mit uns weiterfeiern möchten! Wir feiern an einer ganz besonderen Location weiter. Da wir auf Ibiza sind, muss die Nacht nicht enden :) <strong>Wichtig:</strong> Bitte meldet euch im Voraus bei uns an, wenn ihr bei der Afterparty dabei sein wollt, da wir hierfür vorausplanen müssen.</p>
+          </div>
+          <div class="detail-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span data-lang="en">External location TBD</span>
+            <span data-lang="de">Externe Location wird noch bekannt gegeben</span>
+          </div>
+        </div>
+
+        <!-- Good to Know -->
+        <div class="detail-card" id="info-general">
+          <h2 data-lang="en">Good to Know</h2>
+          <h2 data-lang="de">Gut zu wissen</h2>
+          <div class="detail-body">
+            <p data-lang="en"><strong>Weather</strong><br>September is one of the most beautiful months on Ibiza. Expect warm, sunny days with temperatures around 25–28°C during the day. The sea is still wonderfully warm for swimming. However, once the sun sets, it can cool down noticeably — especially with the sea breeze. We recommend bringing a light jacket or pashmina for the evening hours.</p>
+            <p data-lang="de"><strong>Wetter</strong><br>Der September ist einer der schönsten Monate auf Ibiza. Ihr könnt mit warmen, sonnigen Tagen und Temperaturen um die 25–28°C rechnen. Das Meer ist noch wunderbar warm zum Schwimmen. Nach Sonnenuntergang kann es allerdings spürbar abkühlen — besonders mit der Meeresbrise. Wir empfehlen, eine leichte Jacke oder einen Pashmina-Schal für die Abendstunden mitzubringen.</p>
+
+            <p data-lang="en"><strong>Dress Code</strong><br>Our dress code is cocktail attire. Think elegant but comfortable — no need to be overly formal, but please dress up for the occasion. <em>Important for the ladies:</em> our ceremony takes place outdoors on natural stone ground. Please avoid stilettos and pointed heels — opt for block heels, wedges, or elegant flat sandals instead. You'll thank us later! If you're unsure about cocktail attire, check out <a href="https://www.brides.com/cocktail-attire-wedding-4844364" target="_blank" rel="noopener">this guide</a> for inspiration.</p>
+            <p data-lang="de"><strong>Dresscode</strong><br>Unser Dresscode ist Cocktail-Kleidung. Denkt elegant, aber bequem — es muss nicht übertrieben formell sein, aber kleidet euch dem Anlass entsprechend. <em>Wichtig für die Damen:</em> Unsere Zeremonie findet draußen auf Natursteinboden statt. Bitte vermeidet Stilettos und spitze Absätze — greift stattdessen zu Blockabsätzen, Wedges oder eleganten flachen Sandalen. Ihr werdet es uns danken! Wenn ihr euch unsicher seid, was Cocktail-Kleidung bedeutet, schaut euch <a href="https://www.brides.com/cocktail-attire-wedding-4844364" target="_blank" rel="noopener">diesen Guide</a> zur Inspiration an.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sticky Footer -->
+  <div class="sticky-footer">
+    <span class="footer-date" data-lang="en">September 13th, 2026</span>
+    <span class="footer-date" data-lang="de">13. September 2026</span>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Agenda: click event to show detail
+    document.addEventListener('DOMContentLoaded', () => {
+      const events = document.querySelectorAll('.cal-event');
+      const placeholder = document.getElementById('detailPlaceholder');
+      const cards = document.querySelectorAll('.detail-card');
+
+      events.forEach(ev => {
+        ev.addEventListener('click', () => {
+          const detailId = ev.dataset.detail;
+          const card = document.getElementById(detailId);
+          if (!card) return;
+
+          // Remove active from all
+          events.forEach(e => e.classList.remove('active'));
+          ev.classList.add('active');
+
+          // Hide all cards and placeholder
+          placeholder.style.display = 'none';
+          cards.forEach(c => c.classList.remove('visible'));
+
+          // Show selected
+          card.classList.add('visible');
+
+          // Scroll to detail on mobile
+          if (window.innerWidth <= 768) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+    });
+
+    // Dinner form submission
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtxzbUJJn7AUeFn555Em1ms0eoqWwDgYUlg6fiObaCl0muHucoccPkqGDsXlN2Yz9e/exec';
+
+    document.getElementById('dinnerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]:not([style*="display: none"])');
+      if (btn) { btn.textContent = '...'; btn.disabled = true; }
+
+      const data = {
+        firstName: form.firstName.value.trim(),
+        lastName: form.lastName.value.trim(),
+        meal: form.meal.value,
+        allergies: form.allergies.value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        form.style.display = 'none';
+        document.getElementById('dinnerSuccess').style.display = 'block';
+        const lang = document.querySelector('.lang-btn.active').dataset.lang;
+        setLanguage(lang);
+      } catch (err) {
+        alert('Something went wrong. Please try again.');
+        if (btn) { btn.textContent = 'Submit'; btn.disabled = false; }
+      }
+    });
+  </script>
+</body>
+</html>
