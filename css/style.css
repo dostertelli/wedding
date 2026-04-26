@@ -336,6 +336,17 @@ a:hover {
   letter-spacing: 0.02em;
 }
 
+.hero-welcome {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--text-medium);
+  max-width: 440px;
+  margin: 0 auto 1rem;
+  letter-spacing: 0.01em;
+}
+
 .btn-rsvp {
   display: inline-block;
   padding: 0.6rem 2.2rem;
@@ -576,4 +587,23 @@ a:hover {
   .content-inner {
     padding: 2rem 1.2rem 5rem;
   }
+}
+
+/* ===== HOME PAGE: PHOTO TAKES 2/3 OF WIDTH ===== */
+@media (min-width: 769px) {
+  body.home .photo-side {
+    width: 66.6667%;
+  }
+  body.home .content-side {
+    margin-left: 66.6667%;
+    width: 33.3333%;
+  }
+  body.home .sticky-footer {
+    left: 66.6667%;
+    width: 33.3333%;
+  }
+}
+
+body.home .photo-side img {
+  object-position: center top;
 }
