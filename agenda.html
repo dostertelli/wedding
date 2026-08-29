@@ -624,7 +624,7 @@
             <div class="cal-event" data-detail="sun-shuttle">
               <span class="event-time">14:00</span>
               <span class="event-dot ceremony"></span>
-              <span class="event-label" data-lang="en">Outbound</span>
+              <span class="event-label" data-lang="en">Travel to Venue</span>
               <span class="event-label" data-lang="de">Hinfahrt</span>
             </div>
             <div class="cal-event" data-detail="sun-welcome">
@@ -729,7 +729,7 @@
         <div class="detail-card" id="sun-shuttle">
           <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
           <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
-          <h2 data-lang="en">Outbound</h2>
+          <h2 data-lang="en">Travel to Venue</h2>
           <h2 data-lang="de">Hinfahrt</h2>
           <div class="detail-time">14:00</div>
           <div class="detail-body">
@@ -976,6 +976,12 @@
                 <span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Aparthotel+Puerto+Cala+Vadella" target="_blank" rel="noopener">Aparthotel Puerto Cala Vadella</a>
               </div>
             </div>
+            <div class="shuttle-route" style="--route-color:#4e6b7a;">
+              <span class="shuttle-route-num">4</span>
+              <div class="shuttle-route-path">
+                <span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Can+Ma%C3%B1a+Sant+Josep+Ibiza" target="_blank" rel="noopener">Can Maña</a>
+              </div>
+            </div>
           </div>
           <div id="shuttle-map-return" class="shuttle-map"></div>
           <div class="shuttle-map-caption">
@@ -1173,7 +1179,8 @@
         initShuttleMap('shuttle-map-return', [
           { stops: ['paissa', 'pacha', 'iberostar'] },
           { stops: ['paissa', 'portSantAntoni'] },
-          { stops: ['paissa', 'puertoCalaVadella'] }
+          { stops: ['paissa', 'puertoCalaVadella'] },
+          { stops: ['paissa', 'canMana'] }
         ]);
         const m = document.getElementById('shuttle-map-return')._leafletMap;
         if (m) setTimeout(() => m.invalidateSize(), 100);
