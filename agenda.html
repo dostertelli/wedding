@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     /* ===== AGENDA LAYOUT OVERRIDE ===== */
     .page-wrapper {
@@ -232,6 +234,237 @@
       margin-bottom: 1.5rem;
     }
 
+    .detail-card .detail-img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      background: #e0ddd5;
+    }
+
+    .detail-card .detail-img-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-card .detail-img-grid img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #e0ddd5;
+    }
+
+    .detail-card .detail-video-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-card .detail-video-grid video {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #1a1a1a;
+      display: block;
+    }
+
+    .detail-card .detail-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.2rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .detail-card .detail-links a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(107,112,92,0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .detail-card .detail-links a:hover {
+      border-bottom-color: var(--accent);
+    }
+
+    .detail-card .detail-links svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .detail-card .detail-note {
+      margin-top: 1rem;
+      padding: 0.7rem 1rem;
+      background: rgba(107,112,92,0.08);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: var(--text-medium);
+    }
+
+    .detail-card .detail-vip {
+      margin-top: 1.5rem;
+      padding: 1.2rem 1.4rem;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+      color: #f8f6f1;
+      border-radius: 8px;
+      border: 1px solid rgba(196,164,102,0.4);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .detail-card .detail-vip-label {
+      display: inline-block;
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c4a466;
+      margin-bottom: 0.6rem;
+      font-weight: 700;
+    }
+
+    .detail-card .detail-vip-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: #f8f6f1;
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    .detail-card .detail-vip ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .detail-card .detail-vip li {
+      padding: 0.35rem 0 0.35rem 1.4rem;
+      position: relative;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: rgba(248,246,241,0.9);
+    }
+
+    .detail-card .detail-vip li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.85rem;
+      width: 8px;
+      height: 8px;
+      background: #c4a466;
+      border-radius: 50%;
+    }
+
+    /* ===== Shuttle Routes & Map ===== */
+    .shuttle-routes {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin: 1.2rem 0 1.5rem;
+    }
+
+    .shuttle-route {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      padding: 0.7rem 0.9rem;
+      background: rgba(107,112,92,0.06);
+      border-radius: 6px;
+      border-left: 3px solid var(--route-color, var(--accent));
+      font-size: 0.88rem;
+    }
+
+    .shuttle-route-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 26px;
+      background: var(--route-color, var(--accent));
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .shuttle-route-path {
+      color: var(--text-medium);
+      line-height: 1.5;
+    }
+
+    .shuttle-route-path a {
+      color: var(--text-dark);
+      border-bottom: 1px dotted rgba(107,112,92,0.4);
+      text-decoration: none;
+    }
+
+    .shuttle-route-path a:hover {
+      border-bottom-color: var(--accent);
+    }
+
+    .shuttle-route-path .arrow {
+      color: var(--text-light);
+      margin: 0 0.3rem;
+      font-size: 0.85em;
+    }
+
+    .shuttle-map {
+      width: 100%;
+      height: 420px;
+      border-radius: 8px;
+      margin-top: 1.2rem;
+      background: #e0ddd5;
+      z-index: 0;
+    }
+
+    .shuttle-map-caption {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      text-align: center;
+      font-style: italic;
+    }
+
+    .marker-pin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50% 50% 50% 0;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 12px;
+      transform: rotate(-45deg);
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .marker-pin span {
+      transform: rotate(45deg);
+    }
+
+    .marker-pin.destination {
+      background: #c4a466;
+      width: 34px;
+      height: 34px;
+      font-size: 14px;
+    }
+
     .detail-card .detail-body {
       font-size: 0.95rem;
       color: var(--text-medium);
@@ -388,6 +621,12 @@
             <span class="day-tag highlight" data-lang="de">Hochzeitstag</span>
           </div>
           <div class="cal-events">
+            <div class="cal-event" data-detail="sun-shuttle">
+              <span class="event-time">14:00</span>
+              <span class="event-dot ceremony"></span>
+              <span class="event-label" data-lang="en">Outbound</span>
+              <span class="event-label" data-lang="de">Hinfahrt</span>
+            </div>
             <div class="cal-event" data-detail="sun-welcome">
               <span class="event-time">14:30</span>
               <span class="event-dot ceremony"></span>
@@ -415,10 +654,17 @@
               <span class="event-dot party"></span>
               <span class="event-label">Party</span>
             </div>
+            <div class="cal-event" data-detail="sun-return">
+              <span class="event-time">00:00</span>
+              <span class="event-dot ceremony"></span>
+              <span class="event-label" data-lang="en">Return</span>
+              <span class="event-label" data-lang="de">Rückfahrt</span>
+            </div>
             <div class="cal-event" data-detail="sun-afterparty">
               <span class="event-time">00:00</span>
               <span class="event-dot party"></span>
-              <span class="event-label">Afterparty</span>
+              <span class="event-label" data-lang="en">Afterparty — Pacha</span>
+              <span class="event-label" data-lang="de">Afterparty — Pacha</span>
             </div>
           </div>
         </div>
@@ -442,7 +688,7 @@
 
         <!-- Placeholder when nothing is selected -->
         <div class="detail-placeholder" id="detailPlaceholder">
-          <img src="img/agenda.jpeg" alt="Païssa d'en Bernat, Ibiza">
+          <img src="img/agenda.jpeg" alt="Wedding venue, Ibiza">
         </div>
 
         <!-- ===== DETAIL CARDS ===== -->
@@ -455,13 +701,81 @@
           <h2 data-lang="de">Polterabend</h2>
           <div class="detail-time">19:00</div>
           <div class="detail-body">
-            <p data-lang="en">Join us the evening before the wedding for our rehearsal dinner — a fun, relaxed get-together to kick off the celebrations. Details to follow.</p>
-            <p data-lang="de">Feiert mit uns am Vorabend der Hochzeit einen traditionellen Polterabend — ein entspanntes Beisammensein zum Auftakt der Feierlichkeiten. Details folgen.</p>
+            <p data-lang="en">Join us the evening before the wedding at <strong>Restaurant Cas Mila</strong> — a beautiful seaside spot on the cliffs above Cala Tarida with breathtaking sunset views. Relaxed, warm and the perfect way to kick off the celebrations together.</p>
+            <p data-lang="de">Feiert mit uns am Vorabend der Hochzeit im <strong>Restaurant Cas Mila</strong> — ein wunderschönes Restaurant auf den Klippen über der Cala Tarida mit atemberaubendem Sonnenuntergang. Entspannt, herzlich und der perfekte Auftakt in die Feierlichkeiten.</p>
+          </div>
+          <div class="detail-video-grid">
+            <video src="img/agenda/cas-mila.mp4" autoplay muted loop playsinline preload="metadata"></video>
+            <video src="img/agenda/cas-mila-2.mp4" autoplay muted loop playsinline preload="metadata"></video>
+            <video src="img/agenda/cas-mila-3.mp4" autoplay muted loop playsinline preload="metadata"></video>
+            <video src="img/agenda/cas-mila-4.mp4" autoplay muted loop playsinline preload="metadata"></video>
+          </div>
+          <div class="detail-links">
+            <a href="https://www.restaurantecasmila.com/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>Website</a>
+            <a href="https://www.instagram.com/casmilaibiza/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"/></svg>Instagram</a>
+            <a href="https://www.google.com/maps/place//data=!4m2!3m1!1s0x12994b5d89483375:0x9d64fbdc06775c4c" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Google Maps</a>
+          </div>
+          <div class="detail-note">
+            <span data-lang="en"><strong>Please note:</strong> Please arrange your own transport to and from the restaurant.</span>
+            <span data-lang="de"><strong>Hinweis:</strong> Bitte organisiert eure An- und Abfahrt selbst.</span>
           </div>
           <div class="detail-location">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            <span data-lang="en">Location TBD</span>
-            <span data-lang="de">Ort wird noch bekannt gegeben</span>
+            <span>Carrer sa Morena, 07829 Cala Tarida, Ibiza</span>
+          </div>
+        </div>
+
+        <!-- Sunday: Shuttle Service -->
+        <div class="detail-card" id="sun-shuttle">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2 data-lang="en">Outbound</h2>
+          <h2 data-lang="de">Hinfahrt</h2>
+          <div class="detail-time">14:00</div>
+          <div class="detail-body">
+            <p data-lang="en">We are organising a shuttle service to bring everyone comfortably to the <strong>wedding venue</strong> — the exact location remains a little surprise 🤫. Departure is at <strong>14:00</strong> from five different pick-up points across the island.</p>
+            <p data-lang="de">Wir organisieren einen Shuttle Service, der euch bequem zur <strong>Hochzeitslocation</strong> bringt — der genaue Ort bleibt bis dahin eine kleine Überraschung 🤫. Abfahrt ist um <strong>14:00 Uhr</strong> von fünf verschiedenen Abholpunkten auf der Insel.</p>
+          </div>
+          <div class="shuttle-routes">
+            <div class="shuttle-route" style="--route-color:#d64545;">
+              <span class="shuttle-route-num">1</span>
+              <div class="shuttle-route-path">
+                <a href="https://www.google.com/maps/search/?api=1&query=Can+Ma%C3%B1a+Sant+Josep+Ibiza" target="_blank" rel="noopener">Can Maña</a><span class="arrow">→</span><span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span>
+              </div>
+            </div>
+            <div class="shuttle-route" style="--route-color:#2b7fbb;">
+              <span class="shuttle-route-num">2</span>
+              <div class="shuttle-route-path">
+                <a href="https://www.google.com/maps/search/?api=1&query=Villa+Can+Rafalet+Sant+Josep+Ibiza" target="_blank" rel="noopener">Villa Can Rafalet</a><span class="arrow">→</span><span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span>
+              </div>
+            </div>
+            <div class="shuttle-route" style="--route-color:#3c8859;">
+              <span class="shuttle-route-num">3</span>
+              <div class="shuttle-route-path">
+                <a href="https://www.google.com/maps/search/?api=1&query=Port+Sant+Antoni+Ibiza" target="_blank" rel="noopener">Port Sant Antoni</a><span class="arrow">→</span><span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span>
+              </div>
+            </div>
+            <div class="shuttle-route" style="--route-color:#8b4a9e;">
+              <span class="shuttle-route-num">4</span>
+              <div class="shuttle-route-path">
+                <a href="https://www.google.com/maps/search/?api=1&query=7Pines+Resort+Ibiza+Cala+Codolar" target="_blank" rel="noopener">7Pines</a><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Apartamentos+Blanco+Sol+Cala+Vadella" target="_blank" rel="noopener">Apartamentos Blanco Sol</a><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Aparthotel+Puerto+Cala+Vadella" target="_blank" rel="noopener">Aparthotel Puerto Cala Vadella</a><span class="arrow">→</span><span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span>
+              </div>
+            </div>
+            <div class="shuttle-route" style="--route-color:#d97a2e;">
+              <span class="shuttle-route-num">5</span>
+              <div class="shuttle-route-path">
+                <a href="https://www.google.com/maps/search/?api=1&query=Hotel+Torre+del+Mar+Platja+d%27en+Bossa" target="_blank" rel="noopener">Hotel Torre del Mar, Platja d'en Bossa</a><span class="arrow">→</span><span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span>
+              </div>
+            </div>
+          </div>
+          <div id="shuttle-map-outbound" class="shuttle-map"></div>
+          <div class="shuttle-map-caption">
+            <span data-lang="en">Wedding location shown as approximate area (we're keeping the exact spot a little secret 🤫).</span>
+            <span data-lang="de">Die genaue Hochzeitslocation bleibt eine Überraschung — auf der Karte nur der ungefähre Bereich 🤫.</span>
+          </div>
+          <div class="detail-note">
+            <span data-lang="en"><strong>Please be on time!</strong> There is <strong>no parking</strong> available at the wedding venue, so please use the shuttle. We kindly ask everyone to arrive at their pick-up point punctually so we can all get to the ceremony together.</span>
+            <span data-lang="de"><strong>Bitte seid pünktlich!</strong> An der Hochzeitslocation gibt es <strong>keine Parkmöglichkeiten</strong>, bitte nutzt daher den Shuttle. Wir bitten euch, pünktlich am Abholpunkt zu sein, damit wir alle gemeinsam zur Zeremonie kommen.</span>
           </div>
         </div>
 
@@ -583,21 +897,90 @@
           </div>
         </div>
 
-        <!-- Sunday: Afterparty -->
+        <!-- Sunday: Afterparty at Pacha -->
         <div class="detail-card" id="sun-afterparty">
           <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
           <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
-          <h2>Afterparty</h2>
+          <h2 data-lang="en">Afterparty at Pacha — Solomun</h2>
+          <h2 data-lang="de">Afterparty im Pacha — Solomun</h2>
           <div class="detail-time" data-lang="en">00:00 – open end</div>
           <div class="detail-time" data-lang="de">00:00 – open end</div>
+          <img class="detail-img" src="img/agenda/pacha-2.jpg" alt="Pacha Ibiza — Solomun">
           <div class="detail-body">
-            <p data-lang="en">The night is young — and we have a big surprise planned for everyone who wants to keep celebrating with us! We'll continue the party at a very special location. Since this is Ibiza, the night doesn't have to end :) <strong>Important:</strong> Please let us know in advance if you'd like to join the afterparty, as we need to plan ahead for this one.</p>
-            <p data-lang="de">Die Nacht ist noch jung — und wir haben eine große Überraschung für alle geplant, die mit uns weiterfeiern möchten! Wir feiern an einer ganz besonderen Location weiter. Da wir auf Ibiza sind, muss die Nacht nicht enden :) <strong>Wichtig:</strong> Bitte meldet euch im Voraus bei uns an, wenn ihr bei der Afterparty dabei sein wollt, da wir hierfür vorausplanen müssen.</p>
+            <p data-lang="en">The night is far from over. We'll continue at <strong>Pacha</strong> — arguably the most iconic club in the world and an Ibiza institution since 1973. Open since dawn, red cherries everywhere, and a dance floor that has hosted every legend of electronic music.</p>
+            <p data-lang="de">Die Nacht ist noch lange nicht vorbei. Wir feiern weiter im <strong>Pacha</strong> — dem wohl berühmtesten Club der Welt und einer Ibiza-Institution seit 1973. Die roten Kirschen, das kultige Dach, die legendäre Tanzfläche — jeder große Name der elektronischen Musik hat hier gespielt.</p>
+            <p data-lang="en">And here's the magic: exactly on that night, our absolute favourite DJ <strong>Solomun</strong> is headlining. Deep, melodic, hypnotic — the perfect soundtrack to end our wedding celebrations. This is going to be unforgettable.</p>
+            <p data-lang="de">Und das Beste: An genau diesem Abend legt unser absoluter Lieblings-DJ <strong>Solomun</strong> auf. Tief, melodisch, hypnotisch — der perfekte Soundtrack, um unsere Hochzeitsfeier ausklingen zu lassen. Das wird unvergesslich.</p>
+          </div>
+          <div class="detail-video-grid">
+            <video src="img/agenda/solomon-2.mp4" autoplay muted loop playsinline preload="metadata"></video>
+            <video src="img/agenda/solomon.mp4" autoplay muted loop playsinline preload="metadata"></video>
+          </div>
+          <div class="detail-vip">
+            <div class="detail-vip-label" data-lang="en">You're on the list</div>
+            <div class="detail-vip-label" data-lang="de">Ihr steht auf der Liste</div>
+            <div class="detail-vip-title" data-lang="en">VIP Access included</div>
+            <div class="detail-vip-title" data-lang="de">VIP Zugang inklusive</div>
+            <ul>
+              <li data-lang="en">Personal VIP ticket for every guest</li>
+              <li data-lang="de">Persönliches VIP-Ticket für jeden Gast</li>
+              <li data-lang="en">5 drinks included</li>
+              <li data-lang="de">5 Getränke inklusive</li>
+              <li data-lang="en">Express entry — no queuing</li>
+              <li data-lang="de">Direkter Einlass — kein Anstehen</li>
+              <li data-lang="en">Access to the VIP area</li>
+              <li data-lang="de">Zugang zur VIP Area</li>
+            </ul>
+          </div>
+          <div class="detail-links">
+            <a href="https://pacha.com/event/solomun1-13-09-2026" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg><span data-lang="en">Event Details</span><span data-lang="de">Event-Details</span></a>
+            <a href="https://pacha.com/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>pacha.com</a>
+          </div>
+          <div class="detail-note">
+            <span data-lang="en"><strong>Getting to Pacha:</strong> A shuttle takes you straight from our venue to Pacha (Route 1 of the return shuttles). The way home from Pacha is up to you — taxi or share a ride with friends. Ibiza's night doesn't have to end. 🌙</span>
+            <span data-lang="de"><strong>Anfahrt zum Pacha:</strong> Ein Shuttle bringt euch direkt von unserer Location zum Pacha (Route 1 der Rückfahrt-Shuttles). Den Heimweg vom Pacha organisiert bitte jeder selbst — Taxi oder mit Freunden teilen. Auf Ibiza muss die Nacht nicht enden. 🌙</span>
           </div>
           <div class="detail-location">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            <span data-lang="en">External location TBD</span>
-            <span data-lang="de">Externe Location wird noch bekannt gegeben</span>
+            <span>Pacha Ibiza · Av. 8 d'Agost, 07800 Eivissa</span>
+          </div>
+        </div>
+
+        <!-- Sunday: Return Shuttles -->
+        <div class="detail-card" id="sun-return">
+          <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
+          <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
+          <h2 data-lang="en">Return</h2>
+          <h2 data-lang="de">Rückfahrt</h2>
+          <div class="detail-time">00:00</div>
+          <div class="detail-body">
+            <p data-lang="en">After the wedding party, <strong>three return shuttles</strong> will depart from the wedding venue at <strong>00:00</strong>. Route 1 heads to Pacha (for those joining the afterparty) and then continues to Santa Eularia. Routes 2 and 3 go straight back for those who want to end the night.</p>
+            <p data-lang="de">Nach der Hochzeitsparty fahren um <strong>00:00 Uhr drei Rückfahrt-Shuttles</strong> von der Hochzeitslocation zurück. Route 1 fährt zum Pacha (für alle, die zur Afterparty wollen) und weiter nach Santa Eularia. Routen 2 und 3 fahren direkt zurück für alle, die die Nacht ausklingen lassen möchten.</p>
+          </div>
+          <div class="shuttle-routes">
+            <div class="shuttle-route" style="--route-color:#d64545;">
+              <span class="shuttle-route-num">1</span>
+              <div class="shuttle-route-path">
+                <span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Pacha+Ibiza" target="_blank" rel="noopener">Pacha</a><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Hotel+Iberostar+Santa+Eularia+Ibiza" target="_blank" rel="noopener">Hotel Iberostar, Santa Eularia</a>
+              </div>
+            </div>
+            <div class="shuttle-route" style="--route-color:#2b7fbb;">
+              <span class="shuttle-route-num">2</span>
+              <div class="shuttle-route-path">
+                <span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Port+Sant+Antoni+Ibiza" target="_blank" rel="noopener">Port Sant Antoni</a>
+              </div>
+            </div>
+            <div class="shuttle-route" style="--route-color:#3c8859;">
+              <span class="shuttle-route-num">3</span>
+              <div class="shuttle-route-path">
+                <span data-lang="en">Wedding Venue</span><span data-lang="de">Hochzeitslocation</span><span class="arrow">→</span><a href="https://www.google.com/maps/search/?api=1&query=Aparthotel+Puerto+Cala+Vadella" target="_blank" rel="noopener">Aparthotel Puerto Cala Vadella</a>
+              </div>
+            </div>
+          </div>
+          <div id="shuttle-map-return" class="shuttle-map"></div>
+          <div class="shuttle-map-caption">
+            <span data-lang="en">Wedding location shown as approximate area for privacy.</span>
+            <span data-lang="de">Hochzeitslocation als ungefährer Bereich angezeigt (Privatsphäre).</span>
           </div>
         </div>
 
@@ -690,6 +1073,116 @@
         alert('Something went wrong. Please try again.');
         if (btn) { btn.textContent = 'Submit'; btn.disabled = false; }
       }
+    });
+
+    // ===== Shuttle Maps (Leaflet) =====
+    const STADIA_KEY = '19b3224e-d163-4c56-947c-b1ba9ec6bbdc';
+
+    // Precise coordinates from user-supplied addresses.
+    // paissa = APPROXIMATE center — the exact spot is kept private; shown as a circle on the map.
+    const LOC = {
+      paissa:           [38.9075, 1.2450, "Approximate area of the wedding venue"],
+      canMana:          [38.9281, 1.2946, "Can Maña, Sant Josep"],
+      villaCanRafalet:  [38.9110, 1.2830, "Villa Can Rafalet, Sant Josep"],
+      portSantAntoni:   [38.9808, 1.3020, "Port Sant Antoni"],
+      sevenPines:       [38.9080, 1.2160, "7Pines Resort, Cala Codolar"],
+      blancoSol:        [38.9010, 1.2270, "Apartamentos Blanco Sol, Cala Vadella"],
+      puertoCalaVadella:[38.9020, 1.2250, "Aparthotel Puerto Cala Vadella"],
+      torreDelMar:      [38.8790, 1.4100, "Hotel Torre del Mar, Platja d'en Bossa"],
+      pacha:            [38.9145, 1.4425, "Pacha Ibiza"],
+      iberostar:        [38.9860, 1.5340, "Hotel Iberostar, Santa Eularia"]
+    };
+
+    // The wedding venue is shown as this radius (in metres) around 'paissa'.
+    const PAISSA_RADIUS_M = 700;
+
+    const ROUTE_COLORS = ['#d64545', '#2b7fbb', '#3c8859', '#8b4a9e', '#d97a2e'];
+
+    function makePinIcon(label) {
+      return L.divIcon({
+        className: '',
+        html: `<div class="marker-pin"><span>${label}</span></div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -28]
+      });
+    }
+
+    function initShuttleMap(containerId, routes, hideVenueMarker) {
+      const el = document.getElementById(containerId);
+      if (!el || el._leafletMap) return;
+
+      const map = L.map(containerId, { scrollWheelZoom: false, zoomControl: true }).setView([38.94, 1.38], 11);
+      el._leafletMap = map;
+      L.tileLayer(`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`, {
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+        maxZoom: 20
+      }).addTo(map);
+
+      const allLatLngs = [];
+
+      // Draw the venue as a red circle (privacy: exact spot hidden)
+      L.circle([LOC.paissa[0], LOC.paissa[1]], {
+        radius: PAISSA_RADIUS_M,
+        color: '#d64545',
+        weight: 4,
+        fillColor: '#d64545',
+        fillOpacity: 0.15
+      }).addTo(map).bindPopup(`<strong>Wedding Venue</strong><br>Somewhere in this area 🤫`);
+
+      routes.forEach((route, idx) => {
+        const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
+        const points = route.stops.map(k => LOC[k]);
+        const latlngs = points.map(p => [p[0], p[1]]);
+        allLatLngs.push(...latlngs);
+
+        // dashed route line
+        L.polyline(latlngs, { color, weight: 3, opacity: 0.8, dashArray: '6, 8' }).addTo(map);
+
+        // markers for each stop — skip the 'paissa' marker since we show a circle instead
+        route.stops.forEach((k, i) => {
+          if (k === 'paissa') return; // no pin for the venue
+          L.marker([LOC[k][0], LOC[k][1]], { icon: makePinIcon(idx + 1) })
+            .addTo(map)
+            .bindPopup(`<strong>Route ${idx + 1}</strong><br>${LOC[k][2]}`);
+        });
+      });
+
+      if (allLatLngs.length) {
+        map.fitBounds(L.latLngBounds(allLatLngs), { padding: [40, 40] });
+      }
+    }
+
+    // Init maps when their card becomes visible (Leaflet needs the container to be sized)
+    function tryInitShuttleMaps() {
+      const outbound = document.getElementById('sun-shuttle');
+      if (outbound && outbound.classList.contains('visible')) {
+        initShuttleMap('shuttle-map-outbound', [
+          { stops: ['canMana', 'paissa'] },
+          { stops: ['villaCanRafalet', 'paissa'] },
+          { stops: ['portSantAntoni', 'paissa'] },
+          { stops: ['sevenPines', 'blancoSol', 'puertoCalaVadella', 'paissa'] },
+          { stops: ['torreDelMar', 'paissa'] }
+        ]);
+        const m = document.getElementById('shuttle-map-outbound')._leafletMap;
+        if (m) setTimeout(() => m.invalidateSize(), 100);
+      }
+
+      const returnCard = document.getElementById('sun-return');
+      if (returnCard && returnCard.classList.contains('visible')) {
+        initShuttleMap('shuttle-map-return', [
+          { stops: ['paissa', 'pacha', 'iberostar'] },
+          { stops: ['paissa', 'portSantAntoni'] },
+          { stops: ['paissa', 'puertoCalaVadella'] }
+        ]);
+        const m = document.getElementById('shuttle-map-return')._leafletMap;
+        if (m) setTimeout(() => m.invalidateSize(), 100);
+      }
+    }
+
+    // Hook into the cal-event click to also try initialising maps
+    document.querySelectorAll('.cal-event').forEach(ev => {
+      ev.addEventListener('click', () => setTimeout(tryInitShuttleMaps, 50));
     });
   </script>
 </body>

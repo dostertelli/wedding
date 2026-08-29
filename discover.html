@@ -978,15 +978,17 @@
       });
 
       /* ===== Leaflet Map ===== */
+      const STADIA_KEY = '19b3224e-d163-4c56-947c-b1ba9ec6bbdc';
+
       const map = L.map('mapContainer', {
         center: [38.96, 1.41],
         zoom: 11,
-        zoomControl: true,
-        attributionControl: false
+        zoomControl: true
       });
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 17
+      L.tileLayer(`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`, {
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+        maxZoom: 20
       }).addTo(map);
 
       // Custom circle markers by category colour
