@@ -12,9 +12,19 @@
   --text-light: #888;
   --border-color: #2c2c2c;
   --accent: #6b705c;
-  --font-display: 'Cormorant Garamond', 'Georgia', serif;
-  --font-heading: 'Cormorant Garamond', 'Georgia', serif;
+  --font-display: 'Lato', 'Helvetica Neue', sans-serif;
+  --font-heading: 'Lato', 'Helvetica Neue', sans-serif;
   --font-body: 'Lato', 'Helvetica Neue', sans-serif;
+}
+
+/* Global heading weight — using Lato bold for a consistent modern look */
+h1, h2, h3, h4, h5, h6,
+.couple-name, .hero-date, .drawer-title,
+.calendar-header h1, .day-number,
+.detail-card h2, .h-couple, .h-main,
+.detail-vip-title, .footer-date {
+  font-weight: 700 !important;
+  letter-spacing: -0.005em;
 }
 
 html {
