@@ -145,18 +145,8 @@
     }
 
     .cal-event .event-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      flex-shrink: 0;
+      display: none;
     }
-
-    .cal-event .event-dot.ceremony { background: #d4a574; }
-    .cal-event .event-dot.party { background: #a5c4d4; }
-    .cal-event .event-dot.food { background: #c4a5d4; }
-    .cal-event .event-dot.activity { background: #a5d4b4; }
-    .cal-event .event-dot.travel { background: #d4d4a5; }
 
     .cal-event .event-label {
       font-family: var(--font-body);
@@ -786,15 +776,21 @@
           <h2 data-lang="en">Guest Reception</h2>
           <h2 data-lang="de">Gästeempfang</h2>
           <div class="detail-time">14:30</div>
+          <img class="detail-img" src="img/agenda/guest-reception-1.jpg" alt="Guest Reception">
           <div class="detail-body">
-            <p data-lang="en">Please arrive by 14:30 so we can welcome you before the ceremony begins. Enjoy a welcome drink while you find your seat.</p>
-            <p data-lang="de">Bitte seid bis 14:30 Uhr da, damit wir euch vor Beginn der Zeremonie begrüßen können. Genießt einen Willkommensdrink, während ihr euren Platz findet.</p>
+            <p data-lang="en">Everyone arrives together on the shuttles at around <strong>14:30</strong> — we'll welcome you at the venue with a first glass of something cold, a moment to catch up and toast the day ahead before we all take our seats for the ceremony.</p>
+            <p data-lang="de">Alle kommen zeitgleich mit dem Shuttle Service gegen <strong>14:30 Uhr</strong> an — wir begrüßen euch vor Ort mit einem ersten kühlen Drink, einem Moment zum Ankommen und einem gemeinsamen Anstoßen, bevor wir alle unsere Plätze für die Zeremonie einnehmen.</p>
+          </div>
+          <div class="detail-note">
+            <span data-lang="en"><strong>Please note:</strong> If for any reason you're travelling on your own instead of using the shuttle, please make sure to arrive on time — the ceremony starts punctually at <strong>15:00</strong>.</span>
+            <span data-lang="de"><strong>Hinweis:</strong> Wer aus irgendeinem Grund selbst anreist statt den Shuttle zu nutzen, sollte unbedingt pünktlich sein — die Trauung beginnt pünktlich um <strong>15:00 Uhr</strong>.</span>
           </div>
           <div class="detail-dresscode" data-lang="en">Dress code: Cocktail</div>
           <div class="detail-dresscode" data-lang="de">Dresscode: Cocktail</div>
           <div class="detail-location">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            <span>Sant Josep de sa Talaia, Ibiza</span>
+            <span data-lang="en">Wedding Venue, Ibiza</span>
+            <span data-lang="de">Hochzeitslocation, Ibiza</span>
           </div>
         </div>
 
@@ -805,13 +801,15 @@
           <h2 data-lang="en">Ceremony</h2>
           <h2 data-lang="de">Zeremonie</h2>
           <div class="detail-time">15:00</div>
+          <img class="detail-img" src="img/agenda.jpeg" alt="Wedding Ceremony">
           <div class="detail-body">
             <p data-lang="en">Our wedding ceremony will take place outdoors. We kindly ask you not to take photos during the ceremony — our professional photographer will capture every moment.</p>
             <p data-lang="de">Unsere Trauung findet draußen statt. Wir bitten euch, während der Zeremonie keine Fotos zu machen — unser professioneller Fotograf wird jeden Moment festhalten.</p>
           </div>
           <div class="detail-location">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            <span>Sant Josep de sa Talaia, Ibiza</span>
+            <span data-lang="en">Wedding Venue, Ibiza</span>
+            <span data-lang="de">Hochzeitslocation, Ibiza</span>
           </div>
         </div>
 
@@ -825,63 +823,31 @@
             <p data-lang="en">After the ceremony, enjoy drinks and canapés while the newlyweds take their photos. Time to mingle, relax and celebrate!</p>
             <p data-lang="de">Nach der Zeremonie genießt Drinks und Häppchen, während das Brautpaar seine Fotos macht. Zeit zum Plaudern, Entspannen und Feiern!</p>
           </div>
+          <div class="detail-note">
+            <span data-lang="en"><strong>Photo shoot:</strong> There's a photo session planned right after the ceremony. We kindly ask everyone to <strong>stay at the venue</strong> — we'd love to take family and group photos with all of you while the light is still perfect.</span>
+            <span data-lang="de"><strong>Fotoshooting:</strong> Direkt nach der Trauung ist ein Fotoshooting geplant. Wir bitten euch, <strong>vor Ort zu bleiben</strong> — wir möchten mit euch allen Familien- und Gruppenfotos machen, solange das Licht perfekt ist.</span>
+          </div>
         </div>
 
         <!-- Sunday: Dinner -->
         <div class="detail-card" id="sun-dinner">
           <div class="detail-day-label" data-lang="en">Sunday, September 13 — Wedding Day</div>
           <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
-          <h2>Dinner</h2>
+          <h2 data-lang="en">Dinner by Zest</h2>
+          <h2 data-lang="de">Dinner by Zest</h2>
           <div class="detail-time">17:30 – 20:00</div>
           <div class="detail-body">
-            <p data-lang="en">Sit-down dinner to celebrate with our closest family and friends.</p>
-            <p data-lang="de">Festliches Abendessen mit unserer engsten Familie und unseren Freunden.</p>
-
-            <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(107,112,92,0.15);">
-              <p style="font-family:var(--font-body);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-medium);margin-bottom:1rem;" data-lang="en">Dinner Preferences</p>
-              <p style="font-family:var(--font-body);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-medium);margin-bottom:1rem;" data-lang="de">Essenswünsche</p>
-
-              <form id="dinnerForm">
-                <div style="display:flex;gap:1rem;margin-bottom:1rem;">
-                  <div style="flex:1;">
-                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">First Name</label>
-                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Vorname</label>
-                    <input type="text" name="firstName" required style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;">
-                  </div>
-                  <div style="flex:1;">
-                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">Last Name</label>
-                    <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Nachname</label>
-                    <input type="text" name="lastName" required style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;">
-                  </div>
-                </div>
-                <div style="margin-bottom:1rem;">
-                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">Meal Preference</label>
-                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Essenswahl</label>
-                  <select name="meal" required style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;appearance:none;-webkit-appearance:none;background:#fff url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27%3E%3Cpath d=%27M1 1l5 5 5-5%27 stroke=%27%236b705c%27 stroke-width=%271.5%27 fill=%27none%27/%3E%3C/svg%3E') no-repeat right 0.9rem center;padding-right:2.5rem;cursor:pointer;">
-                    <option value="" disabled selected data-lang="en">Please select...</option>
-                    <option value="" disabled selected data-lang="de">Bitte auswählen...</option>
-                    <option value="Beef" data-lang="en">Beef</option>
-                    <option value="Beef" data-lang="de">Rind</option>
-                    <option value="Fisch / Fish" data-lang="en">Fish</option>
-                    <option value="Fisch / Fish" data-lang="de">Fisch</option>
-                  </select>
-                </div>
-                <div style="margin-bottom:1rem;">
-                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="en">Allergies / Dietary Requirements</label>
-                  <label style="display:block;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.3rem;" data-lang="de">Allergien / Besondere Ernährung</label>
-                  <textarea name="allergies" style="width:100%;padding:0.6rem 0.8rem;font-family:var(--font-body);font-size:0.9rem;border:1px solid rgba(107,112,92,0.25);border-radius:4px;outline:none;box-sizing:border-box;resize:vertical;min-height:60px;"></textarea>
-                </div>
-                <button type="submit" style="padding:0.6rem 2rem;font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#fff;background:var(--accent);border:none;border-radius:4px;cursor:pointer;" data-lang="en">Submit</button>
-                <button type="submit" style="padding:0.6rem 2rem;font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#fff;background:var(--accent);border:none;border-radius:4px;cursor:pointer;" data-lang="de">Absenden</button>
-              </form>
-              <div id="dinnerSuccess" style="display:none;text-align:center;padding:1.5rem 0;">
-                <div style="font-size:1.5rem;margin-bottom:0.5rem;">✓</div>
-                <p style="font-family:var(--font-heading);font-size:1.1rem;color:var(--text-dark);" data-lang="en">Thank you!</p>
-                <p style="font-family:var(--font-heading);font-size:1.1rem;color:var(--text-dark);" data-lang="de">Vielen Dank!</p>
-                <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.3rem;" data-lang="en">Your preferences have been saved.</p>
-                <p style="font-size:0.85rem;color:var(--text-light);margin-top:0.3rem;" data-lang="de">Deine Essenswünsche wurden gespeichert.</p>
-              </div>
-            </div>
+            <p data-lang="en">A sit-down dinner curated by <strong>Zest Ibiza</strong> — a team we fell in love with from the very first tasting. <strong>Ben, the chef</strong>, blends flavours from French, Spanish, Italian, Middle Eastern and Japanese cuisines, using the finest local ingredients to create dishes that are vibrant and full of character. <strong>Noemi</strong>, with her dedication and warmth, oversees every detail — from communication to service — making sure the whole evening flows seamlessly.</p>
+            <p data-lang="de">Ein festliches Abendessen kuratiert von <strong>Zest Ibiza</strong> — einem Team, in das wir uns bereits beim ersten Tasting verliebt haben. <strong>Ben, unser Koch</strong>, verbindet Aromen aus französischer, spanischer, italienischer, nahöstlicher und japanischer Küche und kreiert aus feinsten lokalen Zutaten Gerichte voller Charakter und Lebendigkeit. <strong>Noemi</strong> koordiniert mit Hingabe und Wärme jedes Detail — von der Kommunikation bis zum Service — und sorgt dafür, dass der ganze Abend nahtlos fließt.</p>
+            <p data-lang="en">Every course has been chosen with care. Now it's time to sit down, raise a glass and let Ben and his team do the rest. ✨</p>
+            <p data-lang="de">Jeder Gang wurde mit viel Sorgfalt ausgewählt. Jetzt heißt es Platz nehmen, Glas erheben und Ben und sein Team den Rest machen lassen. ✨</p>
+          </div>
+          <div class="detail-video-grid">
+            <video src="img/agenda/zest-1.mp4" autoplay muted loop playsinline preload="metadata"></video>
+            <video src="img/agenda/zest-2.mp4" autoplay muted loop playsinline preload="metadata"></video>
+          </div>
+          <div class="detail-links">
+            <a href="https://www.instagram.com/zestibiza/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"/></svg>@zestibiza</a>
           </div>
         </div>
 
@@ -891,9 +857,12 @@
           <div class="detail-day-label" data-lang="de">Sonntag, 13. September — Hochzeitstag</div>
           <h2>Party</h2>
           <div class="detail-time">20:00 – 00:00</div>
+          <img class="detail-img" src="img/agenda/party-1.jpg" alt="Wedding Party">
           <div class="detail-body">
-            <p data-lang="en">Time to dance! Due to noise restrictions, the venue party ends at midnight.</p>
-            <p data-lang="de">Zeit zum Tanzen! Aufgrund der Lärmschutzvorschriften endet die Party am Veranstaltungsort um Mitternacht.</p>
+            <p data-lang="en">After Ben's incredible dinner it's time to shake off the shoes and let the dance floor come alive. Warm Ibiza night, glass in hand, the people we love around us — we'll keep the party going at the venue until <strong>midnight</strong>.</p>
+            <p data-lang="de">Nach Bens fantastischem Dinner ist es Zeit, die Schuhe abzustreifen und die Tanzfläche beben zu lassen. Warme Ibiza-Nacht, Glas in der Hand, die Menschen, die wir lieben, um uns herum — bis <strong>Mitternacht</strong> feiern wir gemeinsam an der Location weiter.</p>
+            <p data-lang="en">And when midnight comes… the night is far from over. See you at Pacha. 🌙</p>
+            <p data-lang="de">Und wenn Mitternacht schlägt… ist die Nacht noch lange nicht vorbei. Wir sehen uns im Pacha. 🌙</p>
           </div>
         </div>
 
@@ -1050,7 +1019,8 @@
     // Dinner form submission
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtxzbUJJn7AUeFn555Em1ms0eoqWwDgYUlg6fiObaCl0muHucoccPkqGDsXlN2Yz9e/exec';
 
-    document.getElementById('dinnerForm').addEventListener('submit', async (e) => {
+    const dinnerFormEl = document.getElementById('dinnerForm');
+    if (dinnerFormEl) dinnerFormEl.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
       const btn = form.querySelector('button[type="submit"]:not([style*="display: none"])');
